@@ -91,7 +91,7 @@ python scripts/install.py --target ~/.workbuddy/skills
 
 ### 5. DeepSeek Harness（原环境）
 
-原样导入 `team.json` 即可，它认识 `members`、`tasks`、`flowRules` 三个字段。`agent-teams` 技能是该平台的运行时协议，其他客户端用不到。
+原样导入 `team.json` 即可，它认识 `members`、`tasks`、`flowRules` 三个字段。`vendor/agent-teams/` 是该平台的运行时协议（不在 `skills/` 下，安装脚本不会复制），其他客户端用不到。
 
 ### 6. 只能对话、没有工具的环境（ChatGPT 网页等）
 

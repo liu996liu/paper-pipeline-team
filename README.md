@@ -33,15 +33,16 @@ paper-pipeline-team/
 ├── LICENSE              # 许可总览（各部分许可不同）
 ├── team.json            # 团队清单（成员、职责、技能绑定）
 ├── agents/              # 7 名成员的系统提示词（YAML frontmatter + prompt）
-├── skills/              # 8 组技能库
+├── skills/              # 7 组技能库（论文流水线用，共 68 个技能）
 │   ├── academic-research-skills/          选题、框架、期刊规范
 │   ├── supervisor-skills/                 写作、润色、审稿、图表重建
 │   ├── auto-empirical-research-skills/    数据清洗、计量、稳健性
 │   ├── academic-figure-skills/            学术图表设计与绘制
 │   ├── ai-research-skills/                研究全景与方法对比
 │   ├── deep-research-skills/              深度调研流程编排
-│   ├── corpus-paper-archiving/            逐篇精读与读档规范
-│   └── agent-teams/                       团队协作协议
+│   └── corpus-paper-archiving/            逐篇精读与读档规范
+├── vendor/              # 运行平台配套，非论文流水线技能
+│   └── agent-teams/                       团队协作协议（DeepSeek Harness 用，不进 skills 安装）
 ├── scripts/
 │   ├── install.py                       技能库扁平化安装脚本
 │   └── apply_models.py                  按 modelPolicy 同步各成员模型
@@ -57,32 +58,39 @@ paper-pipeline-team/
 
 ## 使用方式
 
-**给其他智能体读取**：`llms.txt` 是本仓库的单文件索引（成员、任务链、69 个技能及仓库内相对路径）。取用方式以 `git clone` 优先 —— 实测在中国大陆网络 `raw.githubusercontent.com` 与 jsDelivr 不通，raw 链接仅作备用。让别的智能体先抓这一个文件，就能定位到需要的具体文件，不必遍历仓库。
+**给其他智能体读取**：`llms.txt` 是本仓库的单文件索引（成员、任务链、68 个技能及仓库内相对路径）。取用方式以 `git clone` 优先 —— 实测在中国大陆网络 `raw.githubusercontent.com` 与 jsDelivr 不通，raw 链接仅作备用。让别的智能体先抓这一个文件，就能定位到需要的具体文件，不必遍历仓库。
 
 **0. 先扁平化（重要）**
 
-本仓库技能是 `skills/<技能族>/<技能>/SKILL.md` 两层（部分嵌到第 4 层），而多数客户端只认一层。用脚本一次装好：
+本仓库技能按技能族分层，最深到第 6 层（如 `skills/auto-empirical-research-skills/aer-skills/skills/<技能>/SKILL.md`），而多数客户端只认一层 `<技能名>/SKILL.md`。**不要手动 `cp -r`**——按族目录整体复制会把多层结构原样搬过去，客户端识别不到。
+
+用脚本一次装好（脚本会遍历全部层级，只复制含 `SKILL.md` 的目录）：
 
 ```bash
 python scripts/install.py --target ~/.claude/skills
 python scripts/install.py --target ~/.workbuddy/skills --dry-run   # 先看会复制什么
 ```
 
+脚本行为：
+- 目标已存在同名技能时**跳过并逐个列出**，要覆盖须显式加 `--force`；
+- `--force` 采用「先复制到临时目录、成功后再原子替换」，复制失败时旧版本原样保留，不会出现旧版已删、新版不全的中间态；
+- 拒绝写入仓库内部路径，也拒绝把已存在的普通文件当目标目录。
+
 在其他客户端（Codex CLI、Cursor、Cline、DeepSeek Harness 等）的接入方式、frontmatter 兼容性问题，见 [docs/portable-usage.md](docs/portable-usage.md)。
 
 **1. 导入技能库**
 
-把 `skills/` 下的每个目录复制到客户端的 skills 目录。以 WorkBuddy / Claude Code 为例：
+用第 0 步的脚本导入，不要手动复制族目录。以 WorkBuddy / Claude Code 为例：
 
 ```bash
 # WorkBuddy（用户级）
-cp -r skills/* ~/.workbuddy/skills/
+python scripts/install.py --target ~/.workbuddy/skills
 
 # Claude Code（项目级）
-cp -r skills/* ./.claude/skills/
+python scripts/install.py --target ./.claude/skills
 ```
 
-> 注意：多数客户端只识别**一层** `<skill-name>/SKILL.md` 结构。若 `skills/<族>/` 下还有嵌套子目录，需按客户端要求扁平化。
+> 各客户端都只识别**一层** `<技能名>/SKILL.md` 结构。脚本已处理好扁平化；若你要自己复制，须自行保证每个技能目录直接位于 skills 根下。
 
 **2. 导入成员定义**
 
@@ -143,12 +151,14 @@ cp -r skills/* ./.claude/skills/
 - **CC-BY-NC-SA-4.0**（`paper-writer`、`paper-polish`、`intro-drafter`、`supervisor-deep-research`）：**禁止商业使用**，衍生版本须以相同许可发布。因此**本仓库整体不可用于商业用途**。
 - 部分目录未声明许可证，版权归原作者，本仓库仅作技术聚合与迁移示例。
 
+> **声明覆盖率**：68 个论文流水线技能中，仅 20 个在 `SKILL.md` frontmatter 或族目录下带有明确许可声明（MIT 10、CC-BY-4.0 6、CC-BY-NC-SA-4.0 4），其余 **48 个无任何许可声明**，按著作权法默认规则版权归原作者，本仓库不构成对其的再分发授权。族级 `LICENSE` 文件仅存在于 4 处（`aer-skills`、`p-hacking-skills`、`replication-package-skeleton`、`drawio-reconstruction`）。`vendor/agent-teams/` 同样未声明许可。使用、再分发或商用前须自行确认各技能来源的授权状况。
+
 ## 引用
 
 若本配置对你的研究有帮助，请按以下任一方式引用（GitHub 页面右侧「Cite this repository」可一键导出）：
 
 ```
-liu996liu. 论文攻坚组 paper-pipeline：六成员学术论文协作智能体团队[CP/OL].
+liu996liu. 论文攻坚组 paper-pipeline：七成员学术论文协作智能体团队[CP/OL].
 GitHub, 2026. https://github.com/liu996liu/paper-pipeline-team.
 ```
 
@@ -157,7 +167,7 @@ BibTeX：
 ```bibtex
 @misc{paperpipeline2026,
   author       = {liu996liu},
-  title        = {论文攻坚组 paper-pipeline：六成员学术论文协作智能体团队},
+  title        = {论文攻坚组 paper-pipeline：七成员学术论文协作智能体团队},
   year         = {2026},
   publisher    = {GitHub},
   howpublished = {\url{https://github.com/liu996liu/paper-pipeline-team}}
@@ -168,4 +178,4 @@ BibTeX：
 
 - 团队成员模型配置为示例值，实际使用时请替换为你所用客户端支持的模型。
 - 本仓库仅保留团队结构与成员职责，不含任何具体论文的数据、稿件或研究过程记录。
-- `skills/agent-teams/` 为运行平台的团队协作协议，其文件路径示例中的用户目录已做占位化处理。
+- `vendor/agent-teams/` 为运行平台的团队协作协议，**不属于论文流水线的技能库**，`scripts/install.py` 不会安装它；它只在 DeepSeek Harness 的 agent-teams 插件环境下起作用，其他客户端可忽略。其文件路径示例中的用户目录已做占位化处理。

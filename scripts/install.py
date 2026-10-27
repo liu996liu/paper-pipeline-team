@@ -5,10 +5,14 @@
     python scripts/install.py --target D:/some/skills --dry-run
 
 只复制含 SKILL.md 的目录，重名时报告冲突而不覆盖。
+
+安全约定：任何覆盖都先复制到目标旁的临时目录，成功后再原子替换。复制失败时
+旧版本原样保留，不会出现「旧版已删、新版不全」的中间态。
 """
 import argparse
 import shutil
 import sys
+import uuid
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -29,6 +33,29 @@ def discover():
     return found
 
 
+def replace_dir(src: Path, dst: Path):
+    """用 src 原子替换 dst：先拷到同级临时目录，成功后再换位。"""
+    tmp = dst.with_name(f".{dst.name}.installing-{uuid.uuid4().hex[:8]}")
+    try:
+        shutil.copytree(src, tmp)
+    except Exception:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    backup = None
+    if dst.exists():
+        backup = dst.with_name(f".{dst.name}.old-{uuid.uuid4().hex[:8]}")
+        dst.rename(backup)
+    try:
+        tmp.rename(dst)
+    except Exception:
+        if backup is not None:
+            backup.rename(dst)
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    if backup is not None:
+        shutil.rmtree(backup, ignore_errors=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--target", required=True, help="目标 skills 目录")
@@ -37,31 +64,49 @@ def main():
     args = ap.parse_args()
 
     target = Path(args.target).expanduser()
+    if not args.dry_run:
+        if target.exists() and not target.is_dir():
+            sys.exit(f"错误：目标路径已存在且不是目录 —— {target}")
+        if target.resolve() == REPO or REPO in target.resolve().parents:
+            sys.exit(f"错误：目标目录位于仓库内部，拒绝写入 —— {target}")
+
     items = discover()
     print(f"发现 {len(items)} 个技能")
 
-    if not args.dry_run:
-        target.mkdir(parents=True, exist_ok=True)
-
-    copied = skipped = 0
+    existed, failed = [], []
+    copied = 0
     for src, name in items:
         dst = target / name
         if dst.exists() and not args.force:
-            skipped += 1
+            existed.append(name)
             continue
         if args.dry_run:
-            print(f"  [待复制] {name}")
+            verb = "覆盖" if dst.exists() else "复制"
+            print(f"  [待{verb}] {name}")
             copied += 1
             continue
-        if dst.exists():
-            shutil.rmtree(dst)
-        shutil.copytree(src, dst)
-        copied += 1
+        try:
+            target.mkdir(parents=True, exist_ok=True)
+            replace_dir(src, dst)
+            copied += 1
+        except Exception as e:
+            failed.append((name, str(e)))
+            print(f"  [失败] {name}: {e}")
 
-    print(f"复制 {copied} 个，跳过 {skipped} 个（已存在，用 --force 覆盖）")
+    print(f"复制 {copied} 个，跳过 {len(existed)} 个，失败 {len(failed)} 个")
+    if existed:
+        print("已存在而跳过（要覆盖请加 --force）：")
+        for n in existed:
+            print(f"  - {n}")
+    if failed:
+        print("失败项（已保留原目录，未损坏）：")
+        for n, msg in failed:
+            print(f"  - {n}: {msg}")
     print(f"目标目录：{target}")
     if args.dry_run:
         print("（--dry-run：未实际写盘）")
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

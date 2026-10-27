@@ -1,6 +1,6 @@
 # 论文攻坚组 paper-pipeline
 
-> 7 名成员的学术论文写作流水线（11 个任务），每名成员绑定一组专用技能库（69 个 SKILL）。
+> 7 名成员的学术论文写作流水线（11 个任务），每名成员绑定一组专用技能库（68 个 SKILL）。
 > 写作与审查分离；质量验收独立且须 pass 才交付。适用于实证类中文学术论文。
 
 ## 如何取用（按顺序，成功即止）
@@ -19,7 +19,8 @@
 - `docs/论文攻坚组-团队配置手册.docx`：完整配置手册
 - `docs/citation-check-template.md`：引注核对表模板（GB/T 7714-2015）
 - `docs/portable-usage.md`：在其他 Agent 客户端接入的方法
-- `scripts/install.py`：技能库扁平化安装脚本
+- `scripts/install.py`：技能库扁平化安装脚本（只装 `skills/` 下 68 个论文技能）
+- `vendor/agent-teams/SKILL.md`：运行平台（DeepSeek Harness）团队协作协议，**不属于论文流水线技能，不被安装脚本复制**
 
 ## 成员（系统提示词）
 
@@ -50,7 +51,7 @@ t1 选题开题(research-orchestrator)
 3. t11 判 fail 时退回 t8，不在验收环节改稿。
 4. t4 是否执行由 t1 的实证判定决定；不需要时 t5、t6 移除对 t4 的依赖。
 
-## 技能库（69 个）
+## 技能库（68 个）
 
 目录为 `skills/<技能族>/<技能>/SKILL.md`。安装到其他客户端前须扁平化为 `<技能>/SKILL.md`，
 用 `python scripts/install.py --target <目录>`（支持 --dry-run / --force）。
@@ -68,10 +69,6 @@ t1 选题开题(research-orchestrator)
 - `skills/academic-research-skills/academic-pipeline/SKILL.md` — **academic-pipeline**：Orchestrator for the full academic research pipeline: research -> write -> integrity check -> review -> revise…
 - `skills/academic-research-skills/deep-research/SKILL.md` — **deep-research**：Universal deep research agent team. 13-agent pipeline for rigorous academic research on any topic. 8 modes: fu…
 - `skills/academic-research-skills/sr-screener/SKILL.md` — **sr-screener**：Protocol-driven study screening for systematic, scoping and rapid reviews. Turns a proposal or PROSPERO protoc…
-
-### agent-teams
-
-- `skills/agent-teams/SKILL.md` — **agent-teams**：Multi-agent team collaboration plugin. Installed via
 
 ### ai-research-skills
 

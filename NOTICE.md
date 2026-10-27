@@ -44,7 +44,7 @@
 - `skills/academic-figure-skills/`
 - `skills/deep-research-skills/`
 - `skills/corpus-paper-archiving/`
-- `skills/agent-teams/`
+- `vendor/agent-teams/`
 - `skills/supervisor-skills/rebuttal-guidance/`
 - `skills/auto-empirical-research-skills/` 下：`de-aigc-skills/`、`full-empirical-python/`、`full-empirical-r/`、`full-empirical-stata/`、`literature-review-tools/`、`statspai/`
 
