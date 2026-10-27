@@ -1,0 +1,4 @@
+interface:
+  display_name: "逐篇读档与总结成书"
+  short_description: "逐篇精读论文、建立可核对的读档，再写总论并汇总成 Word"
+  default_prompt: "请使用 $corpus-paper-archiving 把指定目录里的论文逐篇读一遍，为每篇建立可核对的读档，再写总论并汇总成 Word 文档。"

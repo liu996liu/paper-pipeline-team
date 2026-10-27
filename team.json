@@ -1,0 +1,238 @@
+{
+  "name": "paper-pipeline",
+  "description": "7 成员论文写作流水线（11 个任务）：选题开题 → 文献精读 → 深度调研 → 实证分析 → 图表设计 → 全文写作 → 独立审查 → 修订 → 去 AI 痕迹 → 候选定稿 → 质量验收。写作与审查分离，质量验收须 pass 才交付；t4 是否执行由 t1 的实证判定决定。",
+  "members": [
+    {
+      "name": "research-orchestrator",
+      "role": "研究总控：选题开题、流程编排、完整性核查与定稿（academic-research-skills）",
+      "model": "deepseek-v4.1-flash-sg",
+      "reasoningEffort": "max",
+      "skills": [
+        "academic-research-skills"
+      ],
+      "prompt_file": "agents/research-orchestrator.md",
+      "tier": "strong"
+    },
+    {
+      "name": "corpus-archivist",
+      "role": "文献精读与归档：逐篇精读建可核对读档、写文献综述（corpus-paper-archiving）",
+      "model": "deepseek-v4.1-flash",
+      "reasoningEffort": "",
+      "skills": [
+        "corpus-paper-archiving"
+      ],
+      "prompt_file": "agents/corpus-archivist.md",
+      "tier": "fast"
+    },
+    {
+      "name": "deep-researcher",
+      "role": "深度调研与独立审查：领域全景、方法对比、创新点核查（t3）；并对成稿做内容层面的独立审查（t7）（ai-research-skills + deep-research-skills）",
+      "model": "deepseek-v4.1-flash-sg",
+      "reasoningEffort": "max",
+      "skills": [
+        "ai-research-skills + deep-research-skills"
+      ],
+      "prompt_file": "agents/deep-researcher.md",
+      "tier": "strong"
+    },
+    {
+      "name": "empirical-analyst",
+      "role": "实证分析：数据清洗、计量模型、结果表格、识别假设（auto-empirical-research-skills）",
+      "model": "deepseek-v4.1-flash-sg",
+      "reasoningEffort": "",
+      "skills": [
+        "auto-empirical-research-skills"
+      ],
+      "prompt_file": "agents/empirical-analyst.md",
+      "tier": "standard"
+    },
+    {
+      "name": "figure-designer",
+      "role": "图表设计：图表规划、绘制、PPT 版图（academic-figure-skills）",
+      "model": "deepseek-v4.1-flash",
+      "reasoningEffort": "",
+      "skills": [
+        "academic-figure-skills"
+      ],
+      "prompt_file": "agents/figure-designer.md",
+      "tier": "fast"
+    },
+    {
+      "name": "paper-supervisor",
+      "role": "写作与修订：全文写作、引言专项、语言润色；按独立审查意见逐条修订（supervisor-skills）",
+      "model": "deepseek-v4.1-flash-sg",
+      "reasoningEffort": "max",
+      "skills": [
+        "supervisor-skills"
+      ],
+      "prompt_file": "agents/paper-supervisor.md",
+      "tier": "strong"
+    },
+    {
+      "name": "quality-gatekeeper",
+      "role": "质量与合规验收：引注合规、格式排版、复现包完整性、引文真实性抽核（academic-research-skills + supervisor-skills）",
+      "model": "deepseek-v4.1-flash-sg",
+      "reasoningEffort": "",
+      "skills": [
+        "academic-research-skills",
+        "supervisor-skills"
+      ],
+      "prompt_file": "agents/quality-gatekeeper.md",
+      "tier": "standard"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "name": "选题开题",
+      "owner": "research-orchestrator",
+      "dependsOn": []
+    },
+    {
+      "id": "t2",
+      "name": "文献精读",
+      "owner": "corpus-archivist",
+      "dependsOn": [
+        "t1"
+      ]
+    },
+    {
+      "id": "t3",
+      "name": "深度调研",
+      "owner": "deep-researcher",
+      "dependsOn": [
+        "t1"
+      ]
+    },
+    {
+      "id": "t4",
+      "name": "实证分析",
+      "owner": "empirical-analyst",
+      "dependsOn": [
+        "t1"
+      ],
+      "condition": "t1 判定为需要实证，否则跳过"
+    },
+    {
+      "id": "t5",
+      "name": "图表设计",
+      "owner": "figure-designer",
+      "dependsOn": [
+        "t3"
+      ],
+      "conditionalDependsOn": [
+        "t4"
+      ],
+      "condition": "需要实证时才追加依赖 t4"
+    },
+    {
+      "id": "t6",
+      "name": "全文写作",
+      "owner": "paper-supervisor",
+      "dependsOn": [
+        "t2",
+        "t3",
+        "t5"
+      ],
+      "conditionalDependsOn": [
+        "t4"
+      ],
+      "condition": "需要实证时才追加依赖 t4"
+    },
+    {
+      "id": "t7",
+      "name": "独立审查",
+      "owner": "deep-researcher",
+      "dependsOn": [
+        "t6"
+      ]
+    },
+    {
+      "id": "t8",
+      "name": "修订",
+      "owner": "paper-supervisor",
+      "dependsOn": [
+        "t7"
+      ]
+    },
+    {
+      "id": "t9",
+      "name": "去 AI 痕迹",
+      "owner": "empirical-analyst",
+      "dependsOn": [
+        "t8"
+      ]
+    },
+    {
+      "id": "t10",
+      "name": "候选定稿",
+      "owner": "research-orchestrator",
+      "dependsOn": [
+        "t9"
+      ]
+    },
+    {
+      "id": "t11",
+      "name": "质量验收",
+      "owner": "quality-gatekeeper",
+      "dependsOn": [
+        "t10"
+      ]
+    }
+  ],
+  "flowRules": [
+    "写作（t6）与独立审查（t7）不得由同一成员承担。",
+    "质量验收（t11）独立于写作与修订环节；verdict=pass 方可交付。",
+    "t11 判 fail 时退回 t8 的责任成员，按缺陷清单重走 t8→t11，不在验收环节改稿。",
+    "t4 是否执行由 t1 的实证判定决定；判定为不需要时，t5 与 t6 的依赖中移除 t4。"
+  ],
+  "modelPolicy": {
+    "tiers": {
+      "strong": {
+        "model": "deepseek-v4.1-flash-sg",
+        "reasoningEffort": "max",
+        "note": "判断型任务：选题、审查、写作。换成你账号里的强模型时改这里。"
+      },
+      "standard": {
+        "model": "deepseek-v4.1-flash-sg",
+        "reasoningEffort": "",
+        "note": "有脚本或清单兜底的任务：实证、验收。"
+      },
+      "fast": {
+        "model": "deepseek-v4.1-flash",
+        "reasoningEffort": "",
+        "note": "模式化、量大的任务：读档、绘图。"
+      }
+    },
+    "roles": {
+      "research-orchestrator": {
+        "tier": "strong",
+        "why": "t1 选题决定后续全部返工成本；t10 定稿需判断取舍"
+      },
+      "deep-researcher": {
+        "tier": "strong",
+        "why": "t3 创新点核查与 t7 独立审查都是判断型任务，弱模型易放过问题"
+      },
+      "paper-supervisor": {
+        "tier": "strong",
+        "why": "t6 全文写作与 t8 修订直接决定成稿质量"
+      },
+      "empirical-analyst": {
+        "tier": "standard",
+        "why": "t4 有脚本与结果表兜底；t9 去 AIGC 属模式化改写"
+      },
+      "quality-gatekeeper": {
+        "tier": "standard",
+        "why": "t11 按核对表逐条比对，规则明确，不依赖生成能力"
+      },
+      "corpus-archivist": {
+        "tier": "fast",
+        "why": "t2 读档量大、格式固定，靠模板与页码定位"
+      },
+      "figure-designer": {
+        "tier": "fast",
+        "why": "t5 先规划后绘制，输出是图表规格而非长文本"
+      }
+    }
+  }
+}

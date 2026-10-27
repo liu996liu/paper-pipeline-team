@@ -1,0 +1,30 @@
+本仓库不是单一许可的项目，各部分许可不同。以下为总览，逐目录清单见 NOTICE.md。
+
+1. 团队配置部分（agents/、team.json、README.md、llms.txt、CITATION.cff、docs/、scripts/）
+   —— CC-BY-NC-SA-4.0
+   允许复制、分发与改编，须署名作者并注明本仓库地址；不得用于商业目的；
+   基于本配置的修改版本须以相同许可发布。
+
+2. skills/ 目录下的技能库
+   —— 各自适用其原许可（MIT / CC-BY-4.0 / CC-BY-NC-SA-4.0），部分未声明许可。
+   具体条目与版权方见 NOTICE.md。使用前请逐个核对。
+
+3. 整体限制
+   由于包含 CC-BY-NC-SA-4.0 组件，本仓库整体不可用于商业用途。
+
+如需商业授权，请联系仓库作者。
+
+---
+
+This repository is NOT licensed under a single license. See NOTICE.md for the
+per-directory list.
+
+- Team configuration (agents/, team.json, README.md, llms.txt, CITATION.cff,
+  docs/, scripts/): CC-BY-NC-SA-4.0 — attribution required, non-commercial,
+  share-alike.
+- skills/: each skill keeps its original license (MIT, CC-BY-4.0,
+  CC-BY-NC-SA-4.0), some have none declared. See NOTICE.md.
+- Because CC-BY-NC-SA-4.0 components are included, the repository as a whole
+  may not be used commercially.
+
+For commercial licensing, contact the repository author.
