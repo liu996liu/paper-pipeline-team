@@ -28,6 +28,7 @@
 import argparse
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 try:
@@ -60,14 +61,16 @@ def set_run_font(run, cn="宋体", size=12, bold=None, latin="Times New Roman"):
 
 
 def add_rich_text(p, text, cn="宋体", size=12):
-    """支持 **粗体** 的最小行内标记。"""
+    """支持 **粗体** 与 \\* 字面星号转义的最小行内标记。"""
+    # 先按 **粗体** 切段，再在段内处理 \* 转义为占位符，最后还原为字面 *
+    PLACEHOLDER = "\x00STAR\x00"
     for seg in re.split(r"(\*\*.+?\*\*)", text):
         if not seg:
             continue
-        if seg.startswith("**") and seg.endswith("**") and len(seg) > 4:
-            set_run_font(p.add_run(seg[2:-2]), cn, size, True)
-        else:
-            set_run_font(p.add_run(seg), cn, size, False)
+        bold = seg.startswith("**") and seg.endswith("**") and len(seg) > 4
+        content = seg[2:-2] if bold else seg
+        content = content.replace("\\*", PLACEHOLDER).replace(PLACEHOLDER, "*")
+        set_run_font(p.add_run(content), cn, size, bold)
 
 
 def body_para(doc, text, indent=True, size=12, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
@@ -160,7 +163,74 @@ def make_three_line_table(table, header_rows=1):
             _set_cell_border(cell, **spec)
 
 
-def flush_table(doc, rows):
+def _display_width(text):
+    """按显示宽度折算：中文/全角记 2，其余记 1。"""
+    w = 0
+    for ch in text:
+        w += 2 if unicodedata.east_asian_width(ch) in ("W", "F", "A") else 1
+    return w
+
+
+def _set_fixed_layout(table):
+    """锁定列宽：不加 tblLayout=fixed 的话 Word 会按自动调整覆盖我们算好的宽度。"""
+    tbl_pr = table._tbl.tblPr
+    layout = tbl_pr.find(qn("w:tblLayout"))
+    if layout is None:
+        layout = OxmlElement("w:tblLayout")
+        tbl_pr.append(layout)
+    layout.set(qn("w:type"), "fixed")
+
+
+def _set_repeat_header(table, header_rows=1):
+    """跨页时重复表头行（tblHeader），并禁止行内断页（cantSplit）。
+
+    tblHeader 只对表格开头连续的 header_rows 行生效；Word 在表格跨页时
+    自动在新页顶部重画这几行，解决"表 4 从 p13 跨到 p14 没有表头"的问题。
+    """
+    for i, row in enumerate(table.rows):
+        tr_pr = row._tr.get_or_add_trPr()
+        cant = OxmlElement("w:cantSplit")
+        tr_pr.append(cant)
+        if i < header_rows:
+            th = OxmlElement("w:tblHeader")
+            th.set(qn("w:val"), "true")
+            tr_pr.append(th)
+
+
+def _distribute_widths(rows, ncol, total_cm=14.5, char_cm=0.185, pad_cm=0.42):
+    """按各列最长内容的自然宽度分配列宽。
+
+    先算每列"不换行所需宽度"（字宽 + 单元格左右内边距）。总需求在版心内就放大填满；
+    超出时只从较宽的列（文字列）里回收空间，较窄的列（数字列）保持原宽，
+    避免 "312"、"3.3333" 这类数字被拆行。
+    """
+    natural = []
+    for j in range(ncol):
+        units = max(_display_width(r[j].strip()) for r in rows)
+        natural.append(units * char_cm + pad_cm)
+    total_need = sum(natural)
+    if total_need <= total_cm:
+        k = total_cm / total_need
+        return [w * k for w in natural]
+    # 由窄到宽依次给足：窄列（数字列）先拿满自身自然宽度，剩下的亏空全由宽列（文字列）承担
+    widths = [0.0] * ncol
+    order = sorted(range(ncol), key=lambda j: natural[j])
+    remaining = total_cm
+    k = ncol
+    for idx, j in enumerate(order):
+        share = remaining / k
+        if natural[j] <= share:
+            widths[j] = natural[j]
+            remaining -= natural[j]
+            k -= 1
+        else:
+            for j2 in order[idx:]:
+                widths[j2] = remaining / k
+            break
+    return widths
+
+
+def flush_table(doc, rows, total_cm=14.5, font_pt=9.0):
     """rows: list[list[str]]，第一行为表头。"""
     if not rows:
         return
@@ -168,10 +238,16 @@ def flush_table(doc, rows):
     rows = [r + [""] * (ncol - len(r)) for r in rows]
     table = doc.add_table(rows=len(rows), cols=ncol)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    table.autofit = True
+    table.autofit = False
+    # 字宽按实际字号折算：9 磅中文约 0.317cm、半角约 0.16cm，取 0.16 作单宽单位
+    char_cm = font_pt / 9.0 * 0.16
+    widths = _distribute_widths(rows, ncol, total_cm=total_cm, char_cm=char_cm)
+    for j, w in enumerate(widths):
+        table.columns[j].width = Cm(w)
     for i, row in enumerate(rows):
         for j, text in enumerate(row):
             cell = table.cell(i, j)
+            cell.width = Cm(widths[j])
             cell.text = ""
             p = cell.paragraphs[0]
             pf = p.paragraph_format
@@ -180,7 +256,9 @@ def flush_table(doc, rows):
             pf.space_after = Pt(2)
             pf.first_line_indent = Pt(0)
             pf.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            add_rich_text(p, text.strip(), "宋体", 10.5)
+            add_rich_text(p, text.strip(), "宋体", font_pt)
+    _set_fixed_layout(table)
+    _set_repeat_header(table, header_rows=1)
     make_three_line_table(table, header_rows=1)
     # 表格后留一行空段，避免与下文粘连
     sp = doc.add_paragraph()
@@ -202,8 +280,44 @@ def parse_table_row(line):
     return [c.strip() for c in line.split("|")]
 
 
-def render_markdown(doc, md_text, pending_formulas):
-    """把正文 Markdown 渲染进 docx。支持标题、段落、管道表、列表、引用块、分隔线。"""
+def add_figure(doc, src, caption, width_cm=None, report=None):
+    """插图 + 图题。图片缺失时降级为一行提示，不让整份文档生成失败。
+
+    默认宽度 14.5cm（A4 页面 21cm 减去左右各 3.17cm 页边距后的版心宽度）。
+    高度不指定，由 python-docx 按原图长宽比自动换算。
+    """
+    if not src.exists():
+        if report is not None:
+            report.setdefault("missing", []).append(str(src))
+        p = doc.add_paragraph()
+        p.paragraph_format.first_line_indent = Pt(0)
+        p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        set_run_font(p.add_run(f"[图片缺失：{src}]"), "宋体", 10.5, False)
+    else:
+        if report is not None:
+            report["embedded"] = report.get("embedded", 0) + 1
+        p = doc.add_paragraph()
+        p.paragraph_format.first_line_indent = Pt(0)
+        p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_before = Pt(6)
+        p.paragraph_format.space_after = Pt(2)
+        run = p.add_run()
+        run.add_picture(str(src), width=Cm(width_cm if width_cm else 14.5))
+
+    if caption:
+        c = doc.add_paragraph()
+        c.paragraph_format.first_line_indent = Pt(0)
+        c.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        c.paragraph_format.space_before = Pt(0)
+        c.paragraph_format.space_after = Pt(6)
+        set_run_font(c.add_run(caption), "宋体", 10.5, False)
+
+
+def render_markdown(doc, md_text, pending_formulas, base_dir=None, fig_report=None):
+    """把正文 Markdown 渲染进 docx。支持标题、段落、管道表、列表、引用块、插图、分隔线。
+
+    base_dir：图片相对路径的基准目录（通常为 Markdown 文件所在目录）。
+    """
     lines = md_text.splitlines()
     i = 0
     while i < len(lines):
@@ -225,6 +339,20 @@ def render_markdown(doc, md_text, pending_formulas):
         if m:
             level = min(len(m.group(1)), 3)
             heading(doc, m.group(2).strip(), level)
+            i += 1
+            continue
+
+        # 插图：![图题](相对路径 "可选宽度cm")。路径相对 Markdown 文件所在目录。
+        m = re.match(r'^!\[(.*?)\]\((.+?)\)\s*$', stripped)
+        if m:
+            caption, target = m.group(1).strip(), m.group(2).strip()
+            width = None
+            wm = re.search(r'\s+"([\d.]+)"\s*$', target)
+            if wm:
+                width = float(wm.group(1))
+                target = target[:wm.start()].strip()
+            src = (base_dir / target) if base_dir else Path(target)
+            add_figure(doc, src, caption, width, fig_report)
             i += 1
             continue
 
@@ -428,8 +556,10 @@ def main():
         build_title_page(doc, args)
         doc.add_page_break()
 
+    fig_report = {}
     md = args.manuscript.read_text(encoding="utf-8")
-    render_markdown(doc, md, pending_formulas)
+    render_markdown(doc, md, pending_formulas,
+                    base_dir=args.manuscript.parent, fig_report=fig_report)
 
     if args.refs_file and args.refs_file.exists():
         doc.add_page_break()
@@ -442,6 +572,11 @@ def main():
     print(f"[已生成] {args.out}")
     print(f"  模板：{'套用 ' + str(args.template) if args.template else '默认样式'}")
     print(f"  题名页：{'否' if args.no_title_page else '是'}")
+    n_fig = fig_report.get("embedded", 0)
+    if n_fig:
+        print(f"  插图：已嵌入 {n_fig} 张")
+    for miss in fig_report.get("missing", []):
+        print(f"  [警告] 图片缺失，已降级为文字提示：{miss}")
     if pending_formulas:
         print(f"\n[待转公式 {len(pending_formulas)} 条] 需在 Word 内用 Alt+= 转为 OMML：")
         for f in pending_formulas[:20]:

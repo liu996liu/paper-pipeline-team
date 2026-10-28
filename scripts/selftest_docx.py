@@ -48,10 +48,38 @@ SAMPLE = """# 引言
 
 注：括号内为聚类稳健标准误，*** p<0.01。
 
+![图 1　基准回归系数](figs/probe.png)
+
 ## 稳健性检验
 
 替换被解释变量后结论依然成立。
 """
+
+
+def _write_probe_png(path: Path, width: int = 160, height: int = 100) -> None:
+    """写一张最小灰度 PNG。
+
+    只依赖标准库（zlib），不引入 Pillow——CI 上不该为了测插图而多装一个包。
+    每行前面加一个 filter 字节 0（None），这是 PNG 规范要求的行首。
+    """
+    import struct
+    import zlib
+
+    raw = b"".join(
+        b"\x00" + bytes([(x * 255) // max(width - 1, 1) for x in range(width)])
+        for _ in range(height)
+    )
+
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF))
+
+    png = b"\x89PNG\r\n\x1a\n"
+    png += chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 0, 0, 0, 0))
+    png += chunk(b"IDAT", zlib.compress(raw, 9))
+    png += chunk(b"IEND", b"")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(png)
 
 
 def main() -> int:
@@ -59,6 +87,7 @@ def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="docx-selftest-"))
     md = tmp / "manuscript.md"
     md.write_text(SAMPLE, encoding="utf-8")
+    _write_probe_png(tmp / "figs" / "probe.png")
     out = tmp / "submission.docx"
 
     r = subprocess.run(
@@ -107,7 +136,21 @@ def main() -> int:
         print("[FAIL] 中图分类号未出现在文档中", file=sys.stderr)
         return 1
 
-    print(f"[OK  ] docx 冒烟测试通过：{size} 字节，含表格与题名页")
+    # 插图：Markdown 的 ![](path) 必须变成真正的内嵌图片，而不是一行文字。
+    # 判断依据是 OOXML 里有 drawing 节点，且 media/ 下确有图片实体。
+    with zipfile.ZipFile(out) as z:
+        media = [n for n in z.namelist() if n.startswith("word/media/")]
+    if "<w:drawing>" not in doc:
+        print("[FAIL] 没有 drawing 节点，Markdown 插图未嵌入", file=sys.stderr)
+        return 1
+    if not media:
+        print("[FAIL] word/media/ 下没有图片实体", file=sys.stderr)
+        return 1
+    if "图 1" not in doc:
+        print("[FAIL] 图题未出现在文档中", file=sys.stderr)
+        return 1
+
+    print(f"[OK  ] docx 冒烟测试通过：{size} 字节，含表格、题名页与 {len(media)} 张插图")
     return 0
 
 

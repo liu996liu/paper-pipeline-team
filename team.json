@@ -514,8 +514,7 @@
         "正文出现的每个数字都能在 30-analysis 结果表中找到同值单元格"
       ],
       "verify": [
-        "python scripts/verify_paper.py stats paper/<slug>/50-draft/v1/manuscript.md",
-        "python scripts/verify_paper.py citations paper/<slug>/50-draft/v1/manuscript.md"
+        "python scripts/verify_paper.py all paper/<slug>/50-draft/v1/manuscript.md --results paper/<slug>/30-analysis/results"
       ],
       "deliverables": [
         "50-draft/v1/manuscript.md",

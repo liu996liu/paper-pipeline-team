@@ -188,17 +188,25 @@ python scripts/docx_build_submission.py manuscript.md \
 ## 七、交稿前的机械核对（用脚本，不要肉眼）
 
 ```bash
-# 统计量与正文数字一致性
+# 统计量与 p 值是否对得上
+python scripts/verify_paper.py stats manuscript.md
+
+# 正文数字与结果表是否一致
 python scripts/verify_paper.py numbers manuscript.md --results 30-analysis/results
 
-# 参考文献 GB/T 7714-2015 必备元素
-python scripts/verify_paper.py citations manuscript.md
+# 数量断言与数据是否一致（「9 个题项全部显著」「8 题为 5 级计分」）
+python scripts/verify_paper.py counts manuscript.md --results 30-analysis/results
 
-# 参考文献条目数 vs 正文引用最大序号
+# 参考文献 GB/T 7714-2015 必备元素 + 条目数 vs 正文最大序号
 python scripts/verify_paper.py citations manuscript.md --check-numbering
+
+# 或者一次跑完
+python scripts/verify_paper.py all manuscript.md --results 30-analysis/results
 ```
 
-这三条过不了的稿子，投出去也会在格式审查阶段被打回。
+这四条过不了的稿子，投出去也会在格式审查阶段被打回。
+
+**`counts` 是四条里最容易被跳过、也最容易翻车的一条。** 实测过一次：正文写「图 1 给出 7 个 1—5 分题项的均值」，而图里实际画了 8 条；又写「9 题为 5 级计分」，而数据字典里实际是 8 题。这两个数字都在任何结果表里查不到——`numbers` 只比对小数，`stats` 只重算统计量，两个检查全绿，错误照旧印在稿子上。
 
 ---
 
@@ -220,6 +228,6 @@ python scripts/verify_paper.py citations manuscript.md --check-numbering
 - [ ] 图 ≥300 dpi，题注在图下，正文有交叉引用
 - [ ] 公式为 OMML 原生格式并编号
 - [ ] 页码从正文起编，页眉符合要求
-- [ ] `verify_paper.py numbers` 与 `citations` 均通过
+- [ ] `verify_paper.py` 的 stats / numbers / counts / citations 四项全通过
 - [ ] 文件名含版本与日期
 - [ ] 已人工对照投稿须知逐条过一遍
