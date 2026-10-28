@@ -9,6 +9,58 @@
 
 ---
 
+## 零、AI 能不能自己上知网？——不能，原因要讲清楚
+
+这一段是 2026-10-28 的实测结果，不是猜测。**结论：即使作者有校园网 VPN 账号，
+AI 也接不进去**，只能由作者本人检索、导出、把文件交给 AI 解析。
+
+### 实测 1：直连知网被滑块挡在门外
+
+```
+curl https://kns.cnki.net/kns8s/brief/grid
+→ 403  {"code":-403,"message":"https://kns.cnki.net/verify/home?captchaType=blockPuzzle..."}
+
+curl https://kns.cnki.net/kns8s/defaultresult/index
+→ 302  → https://kns.cnki.net/verify/home?captchaType=blockPuzzle&ident=d3624d...
+```
+
+### 实测 2：用真实浏览器（Edge + CDP）也一样
+
+启动带 `--remote-debugging-port` 的 Edge，通过 DevTools 协议导航到知网检索页，
+落地页是：
+
+```
+href : https://kns.cnki.net/verify/home?captchaType=blockPuzzle&...
+title: 安全验证
+正文 : 请完成安全验证 / 向右滑动完成验证
+input: []            ← 连检索框都没有，页面上只有验证码
+```
+
+所以问题不在「怎么发请求」，而在**知网先要人过滑块，才肯给检索界面**。
+
+### 实测 3：VPN 是给浏览器用的，不是给脚本用的
+
+校园 VPN（Sangfor EasyConnect、Cisco AnyConnect、深信服 aTrust 一类）做的是**网络层隧道**，
+它能让这台机器的浏览器走到「校内 IP」；但它同时有两个硬约束：
+
+1. **登录要本人**：账号密码 + 短信/OTP 二次验证 + 首次绑定设备。AI 没有你的手机。
+2. **改了隧道 ≠ 改了知网的判定**：知网除了看 IP，还看浏览器指纹、Cookie、滑块 token。
+   过了隧道仍然会撞上滑块（实测 1 就是公网 IP，走隧道后是同一套前端）。
+
+> 换句话说：**VPN 解决「能不能到」，滑块解决「是不是人」。后者 AI 过不去。**
+
+### 实测 4：NCPSSD（国家哲社文献中心）曾是唯一半可用入口，但也不稳
+
+2026-10-22 那次跑动里，`www.ncpssd.cn/searchHandler/search` 返回过可用题录
+（见 `papers/sizheng-youth-green-lowcarbon/10-corpus/search-log.md` 第 51–52 行）。
+2026-10-28 复测：同一接口返回 **HTML 落地页（9,592 B），不是 JSON**，POST/GET 都拿不到结构化结果。
+→ 它已经变成需要前端 JS 渲染的页面，不能再当 API 用。
+
+**结论：不要在任何文档或提示词里承诺「AI 会自己去知网查」。** 会写进 `verify` 的检查脚本，
+就必须是能在没有网络的情况下跑通的东西。
+
+---
+
 ## 一、为什么不能用脚本抓
 
 | 做法 | 后果 |
@@ -21,6 +73,52 @@
 **已经失效、不要再装**（曾经常年被推荐，README 已自述失效或停止维护）：
 `bughandler/cnki-downloader`、`itstyren/CNKI-download`、`yanzhou/CnkiSpider`（Python 2）、
 `qiuqingyu/CNKICrawler`、`Arnie97/cnki-pdf`。
+
+---
+
+## 一点五、作者代理检索协议（这是实际会走的路）
+
+既然 AI 进不去，就把分工写死：**作者负责「进得去」，AI 负责「读得懂」。**
+
+### AI 交付物：一份可执行的检索作业单
+
+每当流水线需要中文文献，`corpus-archivist` 必须先产出一份
+`10-literature/cnki-request-<日期>.md`，内容必须包含：
+
+1. **为什么需要**：这个缺口卡住了哪个任务、缺了会导致什么论证接不上；
+2. **检索式**：`专业检索` 语法原文（`SU=` / `TI=` / `KY=` / `AU=` / `LY=` / `YE=`），可整段复制；
+   同时给一份「高级检索界面逐行怎么填」的表，防止专业检索语法版本差异报错；
+3. **筛选条件**：时间范围、来源类别（CSSCI / 北大核心 / CSCD）、文献类型、排序方式；
+4. **纳入与排除标准**：什么样的算合格、什么样的明确不要（这一条最省作者时间）；
+5. **需要几条**：给出下限与上限（如「3–6 篇」），不要写「越多越好」；
+6. **每篇要什么字段**：默认要 RIS；如果某篇特别关键，再额外要 PDF。
+
+### 作者交付物：导出文件
+
+- 优先 **RIS**（跨工具最通用）；中文题录字段最全的是 **NoteExpress**；
+- 存到 `paper/<slug>/10-literature/imports/cnki-YYYYMMDD-<主题>.ris`；
+- **原样保留，不要先手工整理**——解析与去重是脚本的活，手工整理会丢字段；
+- 忘记导出、只复制了参考文献列表也可以：GB/T 7714 格式的纯文本也能解析，但会缺摘要与关键词。
+
+### AI 接手：一条命令解析
+
+```bash
+python scripts/cnki_ingest.py \
+    --inputs paper/<slug>/10-literature/imports/ \
+    --out    paper/<slug>/10-literature/
+```
+
+产出四个文件：
+
+| 文件 | 用途 |
+|---|---|
+| `records.json` | 结构化题录，带预生成的 GB/T 7714-2015 引文，供 t2 建读档 |
+| `records.md` | 人读清单，缺字段的条目打 ⚠ |
+| `issues.md` | 质检报告：缺页码 / 缺卷期 / 缺 DOI / 疑似重复 / 年份可疑 |
+| `sources.json` | 每个导出文件解析出几条，用于核对「导出是不是漏了」 |
+
+**这套脚本不联网、不猜、不补。** 缺页码就写「缺页码（GB/T 7714 期刊条目必需）」，
+由作者回题录页补。这是刻意的：编造一个看起来像真的页码，比留空危险得多。
 
 ---
 
@@ -53,10 +151,19 @@ AND YE=2020-2026
 
 ### 第 3 步：本地解析与去重
 
-用 `skills/corpus-paper-archiving/` 里的解析脚本读 RIS，落成
-`10-literature/records.json`（标题 / 作者 / 刊名 / 年 / 卷期 / 页码 / DOI / 摘要 / 关键词）。
+```bash
+python scripts/cnki_ingest.py \
+    --inputs paper/<slug>/10-literature/imports/ \
+    --out    paper/<slug>/10-literature/
+```
 
-去重规则按优先级：DOI 完全相同 → 标题+首作者+年 → 标题相似度 ≥0.95 且刊名相同。
+落成 `10-literature/records.json`（标题 / 作者 / 刊名 / 年 / 卷期 / 页码 / DOI / 摘要 / 关键词），
+并同时给出 `records.md`（人读）、`issues.md`（质检）、`sources.json`（每个文件解析了几条）。
+支持 RIS / EndNote `.enw` / NoteExpress `.net` / GB/T 7714 纯文本 / MEDLINE `.nbib`，格式自动嗅探。
+
+去重规则按优先级：DOI 完全相同 → 标题+首作者+年 → 标题相似度 ≥0.92（仅提示，不自动合并）。
+**不自动合并**是刻意的：两条看起来一样的题录，可能真是同一篇的两版（网络首发 vs 正式刊出），
+也可能是两篇同题不同作者的文章。
 
 ### 第 4 步：补 PDF 与读档
 
@@ -149,11 +256,22 @@ Crossref 对多数 CSSCI 期刊的 ISSN 直接 404（实测 `1002-4921` 中国�
 
 | 阶段 | 谁做什么 | 产出 |
 |---|---|---|
-| t2 文献精读 | `corpus-archivist` 走本文第二~四节，落 `records.json` 与读档 | `10-literature/` |
+| t1 立项 | 若判定需要中文文献，写清学科与文献类型需求 | `00-brief/` |
+| t2 前 | `corpus-archivist` 出检索作业单，**作者去知网导出 RIS** | `10-literature/cnki-request-<日期>.md` |
+| t2 | `corpus-archivist` 跑 `cnki_ingest.py`、补缺项、逐篇建读档 | `10-literature/records.json` 等 |
 | t3 深度调研 | `deep-researcher` 复用同一文献池，补外文与灰色文献 | `10-literature/review-matrix.md` |
 | t6 写作 | 引注按 GB/T 7714-2015，见 `docs/citation-check-template.md` | `50-draft/vN/manuscript.md` |
 | t8/t9 修订 | 新增引文同样过第六节清单 | 同上 |
-| t10.5 / t11 | `verify_paper.py citations` + 人工抽查 | `60-review/` |
+| t10.5 / t11 | `verify_paper.py citations`（格式要素）+ 人工抽查（真实性） | `60-review/` |
+
+---
+
+## 八、给作者的一句话操作卡
+
+> 当 AI 说「需要中文文献」时，它会给你一份带检索式的作业单。
+> 你只要：**打开知网 → 粘检索式 → 勾选结果 → 导出 RIS → 丢进 `10-literature/imports/`**。
+> 剩下的解析、去重、生成引文、标出缺什么，都是脚本的事。
+> **不要手工整理题录**——手工整理会丢字段，而且丢的那个字段往往就是页码。
 
 ---
 

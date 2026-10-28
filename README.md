@@ -62,6 +62,7 @@ paper-pipeline-team/
 │   ├── apply_models.py                  按 modelPolicy 同步各成员模型
 │   ├── verify_paper.py                  稿件校验：统计量重算 / 正文数字 vs 结果表 / GB/T 7714 引文要素
 │   ├── selftest_docx.py                 交稿 Word 生成脚本的冒烟测试（CI 用）
+│   ├── cnki_ingest.py                   解析知网/万方/维普导出的 RIS·EndNote·NoteExpress·GB/T 7714 文本
 │   ├── export_profile.py                由 team.json 编译出合法的 DSH AgentTeams profile
 │   └── docx_build_submission.py         由 Markdown 生成投稿用 Word（三线表、OMML、套刊模板）
 └── docs/
@@ -71,7 +72,7 @@ paper-pipeline-team/
     ├── model-assignment.md                模型分配（角色级）与换模型方法
     ├── workspace-convention.md            工作区目录约定与交付物落盘规则
     ├── citation-check-template.md         引注核对表模板（GB/T 7714-2015）
-    ├── cnki-workflow.md                   CNKI / 万方 / 维普 文献获取规程（合规路线与禁区）
+    ├── cnki-workflow.md                   CNKI / 万方 / 维普 文献获取规程（含「AI 进不去知网」的实测证据与作者代理检索协议）
     └── skill-audit-report.md              DSH 插件 skill 审计报告（历史文档，与本仓库论文技能无关）
 ```
 
@@ -226,6 +227,7 @@ t1 选题开题（判定实证路径，锁定目标刊）
 | `scripts/apply_models.py --dry-run --strict` | 各成员 frontmatter 里的模型与 `modelPolicy` 是否脱节 |
 | `scripts/verify_paper.py` | 稿件级的：统计量重算（t/F/χ²/Z 的自实现分布，支持全角写法）、正文小数在结果表里找不到、参考文献缺 GB/T 7714 必备要素 |
 | `scripts/selftest_docx.py` | 交稿 Word 生成链路是否还活着（能不能生成含三线表与题名页的 .docx） |
+| `scripts/cnki_ingest.py --selftest` | 中文文献导出解析链路是否还活着（RIS / EndNote / NoteExpress / GB/T 7714 文本四种格式的解析、去重、缺项质检） |
 | `scripts/gen_manual.py --check` | `docs/论文攻坚组-团队配置手册.docx` 是否还是从 team.json 现算的版本（手写的汇总文档迟早与配置脱节，而它长得像官方文件） |
 | `scripts/export_profile.py --check` | `docs/dsh-profile.yml` 是否与 team.json 同步 |
 

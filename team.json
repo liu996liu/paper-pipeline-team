@@ -301,15 +301,23 @@
         "每篇文献一条读档，含出处（作者/篇名/刊名/年/卷期/页码或 DOI）与原文可定位页码",
         "每条判断标注引文原文（≤50 字），不得转述后当引文",
         "综述按争议点组织，不按时间罗列",
-        "读不到的文献标 unverified，不得凭标题臆断内容"
+        "读不到的文献标 unverified，不得凭标题臆断内容",
+        "中文文献由作者从知网导出时，导出文件须原样存放于 10-literature/imports/，不得只保留解析结果",
+        "records.json 由 scripts/cnki_ingest.py 生成；issues.md 列出的字段缺口补齐后方可进综述"
       ],
       "deliverables": [
         "10-literature/corpus/*.md（逐篇读档）",
         "10-literature/review-matrix.md（争议点矩阵）",
-        "10-literature/bibliography.bib 或 refs.json（引文库）"
+        "10-literature/bibliography.bib 或 refs.json（引文库）",
+        "10-literature/imports/（知网/万方/维普原始导出文件：RIS/EndNote/NoteExpress）",
+        "10-literature/records.json 与 issues.md（cnki_ingest.py 产物）"
       ],
       "inScope": [
         "paper/<slug>/10-literature"
+      ],
+      "verify": [
+        "python scripts/cnki_ingest.py --selftest",
+        "python scripts/verify_paper.py --selftest"
       ]
     },
     {

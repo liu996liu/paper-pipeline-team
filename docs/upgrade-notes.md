@@ -15,7 +15,7 @@
 | 6 | 每个 task 补 objective/acceptance/deliverables/inScope | 13 个任务**全部**具备四字段（t1 另有 nonGoals） | `check_team.py` 对质量类任务强制要求 |
 | 7 | 失败重派规则 + 工作区目录约定 | `retryPolicy` 五项（重派阈值 2、代做上限 1、代执行标注格式、升级路径）；`workspace` 九目录 + 三条硬规矩 | flowRule 8/9/10/11；`docs/workspace-convention.md` |
 | 8 | 重新检索高星/权威项目，补 CNKI | 新增 `docs/cnki-workflow.md`；结论见下方「三」 | 文档里写死了「知网无公开 API」与四条合规路线 |
-| 9 | 实证统计全谱系（信效度/方差/回归…） | 新建 **`skills/socialscience-zh/`（16 个原创技能，3722 行）** | `check_skills.py` 全部通过 YAML 校验且被引用 |
+| 9 | 实证统计全谱系（信效度/方差/回归…） | 新建 **`skills/socialscience-zh/`（16 个原创技能，5500 行）** | `check_skills.py` 全部通过 YAML 校验且被引用 |
 
 ## 二、你未提到、但我修掉的硬问题
 
@@ -81,10 +81,28 @@
 
 → 落地写成 `docs/cnki-workflow.md` 的四条路线（合规度降序）：A 人工检索+官方导出（推荐主线）→ B 真浏览器 CDP + 人工过验证码 → C `SepineTam/cnki-mcp`(56★ GPL-3.0，专业检索式最完整) → D 别做：requests+正则爬虫。
 
-### 顺带确认的两个空白
+### 后来实测：连「作者有 VPN」也救不了自动化
+
+作者提出「学校有 VPN 账号有知网资源」。四组实测（记录在 `docs/cnki-workflow.md` 第零节）：
+
+```
+curl https://kns.cnki.net/kns8s/brief/grid            → 403 → verify/home?captchaType=blockPuzzle
+curl https://kns.cnki.net/kns8s/defaultresult/index   → 302 → 同上
+真实 Edge + CDP 导航 → title「安全验证」，正文「请完成安全验证」，input: []（连检索框都没有）
+NCPSSD searchHandler（2026-10-22 还能返 JSON）→ 2026-10-28 复测返回 HTML 落地页
+```
+
+结论：**VPN 是网络层隧道，解决「能不能到」；滑块解决「是不是人」，后者 AI 过不去**。
+校园 VPN 还要本人账号 + 短信/OTP + 设备绑定，AI 拿不到手机。
+
+→ 因此新增**作者代理检索协议**：AI 出「检索作业单」（为什么需要 / 专业检索式原文 /
+筛选条件 / 纳排标准 / 要几篇 / 每篇要什么字段），作者去知网导出 RIS 丢进
+`10-literature/imports/`，再由 `scripts/cnki_ingest.py` 解析。
+这条链路不联网、不猜、不补，缺页码就报缺页码。
+
+### 顺带确认的一个空白
 
 - **中文脚注制 CSL 不存在**。GB/T 7714 是文后参考文献表国标，脚注制是 **CY/T 121-2015**，GitHub 上没有它的高星 CSL，最接近的是一个 20★ 无许可的 2022 年仓库。这块只能自建。
-- **中文投稿信（cover letter）生成器在 GitHub 上不存在**。检索 total=4，全是 0★ 或无关。
 
 ## 四、技能库：84 个，8 族
 
@@ -99,7 +117,7 @@
 | `academic-figure-skills` | 3 | 图分析、图绘制、图转 PPTX |
 | `corpus-paper-archiving` | 1 | 逐篇精读建可核对读档 |
 
-### `socialscience-zh`（16 个原创，3722 行）
+### `socialscience-zh`（16 个原创，5500 行）
 
 **统计方法**（7 个）：`reliability-validity`（α/折半/重测、内容与结构效度）、`efa-cfa`（KMO+Bartlett、平行分析、CFA 拟合、AVE/CR）、`anova-family`（单/双/多因素、ANCOVA、MANOVA、**判别分析**、重复测量、事后比较）、`regression-family`（多元/分层/逐步、logistic、Poisson/负二项、**分位数回归**、正则化、交互项中心化）、`mediation-moderation`（简单/并行/链式中介、**PROCESS Model 1–76 全覆盖**、Bootstrap BCa）、`sem-pls`（SEM 路径、多组比较、PLS-SEM）、`nonparametric-tests`（t 检验、Mann-Whitney、Wilcoxon、Kruskal-Wallis、卡方）。
 
@@ -109,7 +127,7 @@
 
 > 原有技能库里 `选刊`/`投稿信`/`扎根`/`案例研究`/`量表开发`/`问卷设计`/`选题`/`返修`/`中图分类号` 的 grep 命中数**全是 0**。`rebuttal` 有 8 处但全是 ICLR/NeurIPS 语境，中文核心期刊的返修信写法一处都没有。
 
-## 五、九个 CI 脚本（全绿）
+## 五、十个 CI 脚本（全绿）
 
 ```
 check_skills.py                       OK   技能总数 84 ｜ 被引用 84 ｜ 问题 0
@@ -117,16 +135,17 @@ check_team.py                         OK   成员 9 ｜ 任务 13 ｜ 技能 84 
 gen_agents.py --check                 OK   9 份提示词与单一数据源逐字一致
 gen_llms.py --check                   OK   索引与 team.json / skills/ 一致
 apply_models.py --dry-run --strict    OK   9 个成员模型与 modelPolicy 一致
-gen_manual.py --check                 OK   手册可现算（段落 222 / 表格 15）
+gen_manual.py --check                 OK   手册可现算（段落 225 / 表格 15）
 export_profile.py --check             OK   dsh-profile.yml 与 team.json 同步
 verify_paper.py --selftest            OK   9/9 统计分布数值精度
 selftest_docx.py                      OK   交稿 Word 链路活着（38322 字节，含表格与题名页）
+cnki_ingest.py --selftest             OK   29/29 导出格式解析与质检
 ```
 
 ## 六、还剩什么没做
 
-1. **脚注制 CSL 需要自建**（CY/T 121-2015，GitHub 无现成方案）。
-2. **中文投稿信模板**只能手写（GitHub 不存在）。
-3. **`socialscience-zh` 的统计技能未在真实数据上跑过**——都是方法论 + 代码骨架，第一次真用会暴露缺口。建议拿一份已有问卷数据跑一遍 t4b 全链路。
-4. **CI 只在 config 层校验，不跑真稿**——`verify_paper.py` 需要真实 manuscript.md 才有意义，目前只有合成测试稿。
-5. **许可风险仍在**：84 个技能中 48 个无任何许可声明，按著作权法默认规则版权归原作者，本仓库不构成再分发授权。若要商用或公开发布，需要逐个确认或替换。
+1. **脚注制 CSL 需要自建**（CY/T 121-2015，GitHub 无现成方案）。等作者确认是否需要。
+2. **`socialscience-zh` 的统计技能未在真实数据上跑过**——都是方法论 + 代码骨架，第一次真用会暴露缺口。建议拿一份已有问卷数据跑一遍 t4b 全链路。
+3. **CI 只在 config 层校验，不跑真稿**——`verify_paper.py` 需要真实 manuscript.md 才有意义，目前只有合成测试稿。
+4. **许可风险仍在**：84 个技能中 48 个无任何许可声明，按著作权法默认规则版权归原作者，本仓库不构成再分发授权。若要商用或公开发布，需要逐个确认或替换。
+5. **作者代理检索协议没在真实选题上走过一遍**——`cnki_ingest.py` 的自检用的是合成 RIS，真导出文件里的 NoteExpress 字段变体一定比自检样例更野。

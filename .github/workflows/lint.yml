@@ -38,6 +38,12 @@ jobs:
       - name: 交稿 Word 生成脚本冒烟测试
         run: python scripts/selftest_docx.py
 
+      - name: 中文文献导出解析自检
+        # RIS / EndNote / NoteExpress / GB/T 7714 纯文本 四种格式的解析与质检。
+        # 知网没有公开 API，作者手动导出后由它解析——这条链路断了，
+        # 中文文献就永远进不了文献池。
+        run: python scripts/cnki_ingest.py --selftest
+
       - name: 配置手册可从 team.json 现算生成
         # 手册是生成物。手写的汇总文档迟早与配置脱节，
         # 而它长得像官方文件，比 README 更容易被当真。
