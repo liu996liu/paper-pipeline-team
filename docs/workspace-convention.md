@@ -2,7 +2,7 @@
 
 所有交付物落在 `paper/<slug>/<NN-stage>/` 下。**未落盘等于未交付，落错目录也等于未交付。**
 
-`<slug>` 用论文的英文短名（小写连字符，如 `sizheng-youth-green-lowcarbon`），整个项目期间不变。
+`<slug>` 用论文的英文短名（小写连字符，如 `demo-survey-project`），整个项目期间不变。
 
 ---
 

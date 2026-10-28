@@ -52,7 +52,7 @@ input: []            ← 连检索框都没有，页面上只有验证码
 ### 实测 4：NCPSSD（国家哲社文献中心）曾是唯一半可用入口，但也不稳
 
 2026-10-22 那次跑动里，`www.ncpssd.cn/searchHandler/search` 返回过可用题录
-（见 `papers/sizheng-youth-green-lowcarbon/10-corpus/search-log.md` 第 51–52 行）。
+（当时记录在项目工作区的 `10-corpus/search-log.md`）。
 2026-10-28 复测：同一接口返回 **HTML 落地页（9,592 B），不是 JSON**，POST/GET 都拿不到结构化结果。
 → 它已经变成需要前端 JS 渲染的页面，不能再当 API 用。
 
