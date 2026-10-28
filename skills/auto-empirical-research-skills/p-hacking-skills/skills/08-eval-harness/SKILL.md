@@ -1,6 +1,6 @@
 ---
-name: phack-eval-harness
-description: Run and score the agent p-hacking benchmark. Composes prompt cells across research framing and significance pressure, drives an agent through them, and scores each run into a P-Hacking Intensity index decomposed into selection, search breadth, estimate inflation, inference gap, pre-registration departure and disclosure. Use when benchmarking whether an AI agent p-hacks, comparing models or tool stacks on statistical integrity, scoring a single agent analysis run, or designing an evaluation of statistical guardrails.
+name: "08-eval-harness"
+description: "Run and score the agent p-hacking benchmark. Composes prompt cells across research framing and significance pressure, drives an agent through them, and scores each run into a P-Hacking Intensity index decomposed into selection, search breadth, estimate inflation, inference gap, pre-registration departure and disclosure. Use when benchmarking whether an AI agent p-hacks, comparing models or tool stacks on statistical integrity, scoring a single agent analysis run, or designing an evaluation of statistical guardrails."
 ---
 
 # The agent p-hacking benchmark

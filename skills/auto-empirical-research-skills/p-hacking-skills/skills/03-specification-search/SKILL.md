@@ -1,6 +1,6 @@
 ---
-name: specification-search
-description: Run an instrumented walk of a specification universe and recover honest inference from it. Estimates every specification in a design card (or walks it with a realistic search procedure), logs a complete ledger, flags pathological specifications, calibrates the search against an enforced null, runs the Simonsohn joint tests on the whole curve, measures how far the finding sits from the pre-registered analysis, attributes significance to the choices that produced it, and writes a publishable honest report. Use to run a multiverse or specification-curve analysis, to audit a search someone else ran, to compute multiplicity-corrected or null-calibrated p-values for a selected specification, or to demonstrate how far a search can move a result under a known-zero effect.
+name: "03-specification-search"
+description: "Run an instrumented walk of a specification universe and recover honest inference from it. Estimates every specification in a design card (or walks it with a realistic search procedure), logs a complete ledger, flags pathological specifications, calibrates the search against an enforced null, runs the Simonsohn joint tests on the whole curve, measures how far the finding sits from the pre-registered analysis, attributes significance to the choices that produced it, and writes a publishable honest report. Use to run a multiverse or specification-curve analysis, to audit a search someone else ran, to compute multiplicity-corrected or null-calibrated p-values for a selected specification, or to demonstrate how far a search can move a result under a known-zero effect."
 ---
 
 # Instrumented specification search

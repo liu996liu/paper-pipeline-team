@@ -1,6 +1,6 @@
 ---
-name: aer-paper-body
-description: Use when drafting or revising the body sections of an AER, AER:Insights, or AEJ manuscript — institutional background, data, empirical strategy, results, mechanisms, and conclusion. Covers equation conventions, results-paragraph narration, magnitude interpretation, and back-of-envelope policy calculations. Apply after the empirics are stable and before or alongside aer-introduction.
+name: "aer-paper-body"
+description: "Use when drafting or revising the body sections of an AER, AER:Insights, or AEJ manuscript — institutional background, data, empirical strategy, results, mechanisms, and conclusion. Covers equation conventions, results-paragraph narration, magnitude interpretation, and back-of-envelope policy calculations. Apply after the empirics are stable and before or alongside aer-introduction."
 ---
 
 # AER Paper Body

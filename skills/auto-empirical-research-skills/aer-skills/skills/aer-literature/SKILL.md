@@ -1,6 +1,6 @@
 ---
-name: aer-literature
-description: Use when positioning a manuscript against the existing economics literature, building the antecedents map for the introduction, deciding what to cite, or verifying that every reference in the bibliography is real, correctly attributed, and cited to the published version. Apply at topic selection for the novelty scan and again before drafting the introduction.
+name: "aer-literature"
+description: "Use when positioning a manuscript against the existing economics literature, building the antecedents map for the introduction, deciding what to cite, or verifying that every reference in the bibliography is real, correctly attributed, and cited to the published version. Apply at topic selection for the novelty scan and again before drafting the introduction."
 ---
 
 # AER Literature

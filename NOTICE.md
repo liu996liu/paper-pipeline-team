@@ -36,6 +36,35 @@
 
 > 由于包含上述组件，**本仓库整体不可用于商业用途**，也不能整体标注为 MIT。
 
+## 本仓库原创：`skills/socialscience-zh/`（16 个技能）
+
+作者原创，随本仓库以 **CC-BY-NC-SA-4.0** 发布（署名 + 非商用 + 相同方式共享）。
+
+**实证统计族（10 个）**
+
+- `reliability-validity` 信度与效度
+- `efa-cfa` 探索性与验证性因子分析
+- `anova-family` 方差分析全家族
+- `regression-family` 回归分析全家族
+- `mediation-moderation` 中介与调节效应
+- `sem-pls` 结构方程与 PLS-SEM
+- `common-method-bias` 共同方法偏差
+- `sample-size-power` 样本量与功效分析
+- `nonparametric-tests` 非参数与基础差异检验
+- `spss-syntax` SPSS 语法与结果导出
+
+**中文投稿实务族（6 个，2026-10-28 补齐）**
+
+- `qualitative-analysis` 质性研究：扎根理论三级编码、案例研究、访谈、编码信度
+- `journal-submission` 选刊与投稿：CSSCI/北大核心目录核查、选刊矩阵、GB/T 7713.2 摘要要件、中图分类号、cover letter
+- `manuscript-formatting` 交稿排版：GB/T 7714-2015 引注、三线表、脚注制、OMML 公式、套刊模板
+- `response-letter-zh` 中文修回说明：接受 / 部分接受 / 礼貌反驳三策略
+- `research-ethics` 研究伦理：伦理审查、知情同意、匿名化、AIGC 使用声明
+- `bibliometrics-review` 文献计量与系统综述：PRISMA 2020 计数、CNKI 专业检索式、CiteSpace/VOSviewer
+
+这些技能是参考公开的统计学教材、期刊方法与各软件官方文档编写的操作规范，
+不含任何第三方受版权保护的文本或代码。
+
 ## 未声明许可的目录
 
 以下目录内未发现许可证文件或 `license` 字段。按著作权法默认规则，版权归原作者所有，本仓库仅作技术聚合与迁移示例，不构成授权。
@@ -52,7 +81,7 @@
 
 ## 团队配置部分
 
-`agents/`、`team.json`、`README.md`、`CITATION.cff`、`docs/` 为本仓库作者原创整理，采用 **CC-BY-NC-SA-4.0** 许可：
+`agents/`、`team.json`、`README.md`、`llms.txt`、`CITATION.cff`、`docs/`、`scripts/`、`skills/socialscience-zh/` 为本仓库作者原创整理，采用 **CC-BY-NC-SA-4.0** 许可：
 
 - **署名**：引用、转载或改编时须注明来源（本仓库地址）与作者。
 - **非商业**：不得用于商业目的。

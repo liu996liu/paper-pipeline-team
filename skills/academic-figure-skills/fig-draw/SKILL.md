@@ -1,6 +1,6 @@
 ---
-name: fig-draw
-description: Plan, generate, inspect, and refine academic figures from repositories, papers, draft notes, paper URLs, PDFs, or reference images. Design evidence-grounded academic figures and construct, diagnose, or revise scientific image prompts, including semantic palettes, reference-led styles, prompt engineering, information-density feedback, and FigureSpec v1 compilation. Supports fast-track draft-to-figure generation and user passthrough mode.
+name: "fig-draw"
+description: "Plan, generate, inspect, and refine academic figures from repositories, papers, draft notes, paper URLs, PDFs, or reference images. Design evidence-grounded academic figures and construct, diagnose, or revise scientific image prompts, including semantic palettes, reference-led styles, prompt engineering, information-density feedback, and FigureSpec v1 compilation. Supports fast-track draft-to-figure generation and user passthrough mode."
 metadata:
   version: "2.3.0"
   stages: [writing, research, review]

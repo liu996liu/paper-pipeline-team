@@ -1,6 +1,6 @@
 ---
-name: aer-introduction
-description: Use when drafting or rewriting the introduction of an economics manuscript targeted at AER, AER:Insights, or an AEJ, or when compressing an abstract to the mandatory 100-word limit. Implements the Keith Head / Bellemare five-paragraph formula and AER-specific formatting conventions. Apply after the body sections exist.
+name: "aer-introduction"
+description: "Use when drafting or rewriting the introduction of an economics manuscript targeted at AER, AER:Insights, or an AEJ, or when compressing an abstract to the mandatory 100-word limit. Implements the Keith Head / Bellemare five-paragraph formula and AER-specific formatting conventions. Apply after the body sections exist."
 ---
 
 # AER Introduction

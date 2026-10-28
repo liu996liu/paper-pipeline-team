@@ -1,6 +1,6 @@
 ---
-name: fig-analyze
-description: 把仓库、论文/草稿、参考图分析成可交接结果（SemanticArchitecture@1、FigurePlan@1、ReferenceAnalysis@1），不写 prompt，也不生图。
+name: "fig-analyze"
+description: "把仓库、论文/草稿、参考图分析成可交接结果（SemanticArchitecture@1、FigurePlan@1、ReferenceAnalysis@1），不写 prompt，也不生图。"
 metadata:
   version: "1.0.0"
 ---

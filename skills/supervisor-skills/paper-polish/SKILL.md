@@ -1,13 +1,6 @@
 ---
-name: paper-polish
-description: >-
-  Polishes existing academic prose while preserving the author's meaning:
-  grammar and flow repair, tone calibration against evidence strength, AI-tone
-  removal, and Chinese-to-English rewriting at submission quality. Never
-  fabricates data, citations, or claims, and flags any edit that could change
-  scientific meaning. Use when the user asks to polish a draft, fix awkward
-  wording, remove AI flavor, translate a Chinese manuscript into publishable
-  English, or tone down overclaiming.
+name: "paper-polish"
+description: "Polishes existing academic prose while preserving the author's meaning: grammar and flow repair, tone calibration against evidence strength, AI-tone removal, and Chinese-to-English rewriting at submission quality. Never fabricates data, citations, or claims, and flags any edit that could change scientific meaning. Use when the user asks to polish a draft, fix awkward wording, remove AI flavor, translate a Chinese manuscript into publishable English, or tone down overclaiming."
 license: CC-BY-NC-SA-4.0
 ---
 

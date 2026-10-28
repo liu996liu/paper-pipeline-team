@@ -1,13 +1,6 @@
 ---
-name: supervisor-deep-research
-description: >-
-  Runs a deep, survey-grade literature investigation on a research topic:
-  freezes research questions, searches from multiple adversarial
-  perspectives, verifies every citation, synthesizes evidence into a MECE
-  taxonomy with in-sentence cross-comparison, and answers the research
-  questions in an evidence-first report. Use when the user asks for a
-  literature review, a survey of a field, research landscape mapping, or a
-  deep dive into what is known about a topic.
+name: "supervisor-deep-research"
+description: "Runs a deep, survey-grade literature investigation on a research topic: freezes research questions, searches from multiple adversarial perspectives, verifies every citation, synthesizes evidence into a MECE taxonomy with in-sentence cross-comparison, and answers the research questions in an evidence-first report. Use when the user asks for a literature review, a survey of a field, research landscape mapping, or a deep dive into what is known about a topic."
 license: CC-BY-NC-SA-4.0
 ---
 

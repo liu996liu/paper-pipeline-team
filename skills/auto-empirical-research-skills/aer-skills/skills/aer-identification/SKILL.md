@@ -1,6 +1,6 @@
 ---
-name: aer-identification
-description: Use when selecting, implementing, or stress-testing the causal identification strategy for an empirical economics manuscript — difference-in-differences (including staggered designs), instrumental variables (including weak-IV-robust inference), regression discontinuity, synthetic control, or shift-share / Bartik. Apply before writing the introduction or results.
+name: "aer-identification"
+description: "Use when selecting, implementing, or stress-testing the causal identification strategy for an empirical economics manuscript — difference-in-differences (including staggered designs), instrumental variables (including weak-IV-robust inference), regression discontinuity, synthetic control, or shift-share / Bartik. Apply before writing the introduction or results."
 ---
 
 # AER Identification

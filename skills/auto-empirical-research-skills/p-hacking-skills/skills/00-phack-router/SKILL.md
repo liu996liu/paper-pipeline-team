@@ -1,6 +1,6 @@
 ---
-name: phack-router
-description: Entry point for the p-hacking skills suite. Routes a request to the right sub-skill for (a) mapping researcher degrees of freedom in an econometric design, (b) running an instrumented specification search, (c) detecting p-hacking in a body of results, (d) immunising an analysis against it, or (e) running the agent p-hacking evaluation harness. Use whenever the request involves specification search, multiverse or specification-curve analysis, p-curve or caliper tests, publication bias, researcher degrees of freedom, "find me a significant result", robustness theatre, or benchmarking whether an AI agent will p-hack.
+name: "00-phack-router"
+description: "Entry point for the p-hacking skills suite. Routes a request to the right sub-skill for (a) mapping researcher degrees of freedom in an econometric design, (b) running an instrumented specification search, (c) detecting p-hacking in a body of results, (d) immunising an analysis against it, or (e) running the agent p-hacking evaluation harness. Use whenever the request involves specification search, multiverse or specification-curve analysis, p-curve or caliper tests, publication bias, researcher degrees of freedom, \"find me a significant result\", robustness theatre, or benchmarking whether an AI agent will p-hack."
 ---
 
 # p-hacking skills — router

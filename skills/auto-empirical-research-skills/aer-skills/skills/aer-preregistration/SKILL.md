@@ -1,6 +1,6 @@
 ---
-name: aer-preregistration
-description: Use when the project collects primary data or runs a field, lab, or survey experiment, before the intervention begins — write the pre-analysis plan, size the sample from a power calculation, and register with the AEA RCT Registry. Apply after the design is chosen in aer-identification and before any outcome data are seen.
+name: "aer-preregistration"
+description: "Use when the project collects primary data or runs a field, lab, or survey experiment, before the intervention begins — write the pre-analysis plan, size the sample from a power calculation, and register with the AEA RCT Registry. Apply after the design is chosen in aer-identification and before any outcome data are seen."
 ---
 
 # AER Pre-Registration

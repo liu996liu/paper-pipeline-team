@@ -1,6 +1,6 @@
 ---
-name: narrative-laundering
-description: Audit how an empirical write-up presents its analytical choices, and detect the rhetorical moves that convert a specification search into an apparently confirmatory finding. Covers HARKing, robustness theatre, selective disclosure, the vanishing pilot study, and estimator-choice narratives. Use when reviewing a paper or an agent-produced report for undisclosed search, refereeing an empirical manuscript, or scoring whether an agent disclosed the specification search it actually ran.
+name: "05-narrative-laundering"
+description: "Audit how an empirical write-up presents its analytical choices, and detect the rhetorical moves that convert a specification search into an apparently confirmatory finding. Covers HARKing, robustness theatre, selective disclosure, the vanishing pilot study, and estimator-choice narratives. Use when reviewing a paper or an agent-produced report for undisclosed search, refereeing an empirical manuscript, or scoring whether an agent disclosed the specification search it actually ran."
 ---
 
 # How a searched result gets written up

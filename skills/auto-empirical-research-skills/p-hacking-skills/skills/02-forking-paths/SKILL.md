@@ -1,6 +1,6 @@
 ---
-name: forking-paths
-description: Map the garden of forking paths for a concrete econometric design and turn it into a machine-readable design card that the specification-search engine can walk. Use when asked how many defensible analyses a dataset or research design admits, to enumerate researcher degrees of freedom for a specific DiD, IV, RDD, staggered-adoption, panel or cross-sectional study, to build or validate a design card, to encode a pre-registered specification, or to size a multiverse before running it.
+name: "02-forking-paths"
+description: "Map the garden of forking paths for a concrete econometric design and turn it into a machine-readable design card that the specification-search engine can walk. Use when asked how many defensible analyses a dataset or research design admits, to enumerate researcher degrees of freedom for a specific DiD, IV, RDD, staggered-adoption, panel or cross-sectional study, to build or validate a design card, to encode a pre-registered specification, or to size a multiverse before running it."
 ---
 
 # Mapping the garden

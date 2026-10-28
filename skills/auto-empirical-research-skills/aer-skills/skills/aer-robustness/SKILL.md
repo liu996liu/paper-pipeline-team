@@ -1,6 +1,6 @@
 ---
-name: aer-robustness
-description: Use when the main empirical results exist but the manuscript lacks the robustness, heterogeneity, mechanism, and placebo checks that AER referees will demand. Apply after aer-identification and before aer-introduction so that the value-added paragraph can reference these tests.
+name: "aer-robustness"
+description: "Use when the main empirical results exist but the manuscript lacks the robustness, heterogeneity, mechanism, and placebo checks that AER referees will demand. Apply after aer-identification and before aer-introduction so that the value-added paragraph can reference these tests."
 ---
 
 # AER Robustness

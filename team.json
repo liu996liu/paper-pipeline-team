@@ -1,84 +1,263 @@
 {
   "name": "paper-pipeline",
-  "description": "7 成员论文写作流水线（11 个任务）：选题开题 → 文献精读 → 深度调研 → 实证分析 → 图表设计 → 全文写作 → 独立审查 → 修订 → 去 AI 痕迹 → 候选定稿 → 质量验收。写作与审查分离，质量验收须 pass 才交付；t4 是否执行由 t1 的实证判定决定。",
+  "schemaVersion": "2.0",
+  "description": "9 成员论文写作流水线（13 个任务）：选题开题 → 文献精读 → 深度调研 → 实证分析（计量 / 问卷二选一或并行）→ 图表设计 → 全文写作 → 独立审查 → 修订 → 去 AI 痕迹 → 候选定稿 → 差异复审 → 质量验收。写作与审查分离；返工闭环 maxRounds=2；t10 定稿后必过差异复审；每个任务带 objective/acceptance/deliverables/inScope 契约，换模型也不致质量大幅波动。",
+  "workspace": {
+    "root": "paper/<slug>",
+    "layout": {
+      "00-brief": "t1 选题、开题、研究设计、实证路径判定",
+      "10-literature": "t2 逐篇读档、t3 深度调研",
+      "20-data": "原始数据、清洗脚本、数据字典（t4/t4b 输入）",
+      "30-analysis": "分析脚本、结果表、运行日志（t4/t4b 输出）",
+      "40-figures": "图表规划、源文件、导出图（t5）",
+      "50-draft": "各版本稿件 v1/v2/v3（t6/t8/t9/t10）",
+      "60-review": "审查意见、修订对照表、差异复审报告（t7/t10.5/t11）",
+      "70-submission": "定稿、投稿包、复现包（t11 通过后）"
+    },
+    "manifest": "paper/<slug>/MANIFEST.md —— 版本台账：每次交付登记 版本号 / 责任人 / 代执行人 / 上游依据 / 校验结果",
+    "rules": [
+      "交付物必须落在约定目录，未落盘视为未交付。",
+      "稿件不可原地覆盖：v1/v2/v3 并列保留，t8/t9/t10 各自新建版本。",
+      "绝对路径不写入稿件；稿件内引用图表用相对路径。"
+    ],
+    "doc": "docs/workspace-convention.md"
+  },
+  "retryPolicy": {
+    "maxRounds": 2,
+    "consecutiveFailuresBeforeReassign": 2,
+    "captainTakeoverLimit": 1,
+    "deputyAnnotation": "交付物首行必须写明：代执行人 / 原责任人 / 代执行原因 / 授权来源",
+    "escalation": "maxRounds 用尽仍不通过，captain 停止自动重跑，转为人工裁决并把全部 fail 记录附在 60-review/escalation.md"
+  },
   "members": [
     {
       "name": "research-orchestrator",
-      "role": "研究总控：选题开题、流程编排、完整性核查与定稿（academic-research-skills）",
+      "role": "研究总控：选题开题、实证路径判定、完整性核查与候选定稿",
       "model": "deepseek-v4.1-flash-sg",
       "reasoningEffort": "max",
-      "skills": [
-        "academic-research-skills"
-      ],
+      "tier": "strong",
       "prompt_file": "agents/research-orchestrator.md",
-      "tier": "strong"
+      "skillFamilies": [
+        "academic-research-skills",
+        "auto-empirical-research-skills",
+        "socialscience-zh",
+        "supervisor-skills"
+      ],
+      "skills": [
+        "academic-paper",
+        "academic-pipeline",
+        "idea-evaluator",
+        "tech-paper-template",
+        "benchmark-paper-template",
+        "vibe-research-workflow",
+        "journal-submission",
+        "research-ethics",
+        "aer-topic-selection",
+        "aer-workflow"
+      ]
     },
     {
       "name": "corpus-archivist",
-      "role": "文献精读与归档：逐篇精读建可核对读档、写文献综述（corpus-paper-archiving）",
+      "role": "文献精读与归档：逐篇精读建可核对读档、写文献综述、引文落库",
       "model": "deepseek-v4.1-flash",
-      "reasoningEffort": "",
-      "skills": [
-        "corpus-paper-archiving"
-      ],
+      "tier": "fast",
       "prompt_file": "agents/corpus-archivist.md",
-      "tier": "fast"
+      "skillFamilies": [
+        "academic-research-skills",
+        "auto-empirical-research-skills",
+        "corpus-paper-archiving",
+        "socialscience-zh"
+      ],
+      "skills": [
+        "corpus-paper-archiving",
+        "literature-review-tools",
+        "sr-screener",
+        "bibliometrics-review"
+      ]
     },
     {
       "name": "deep-researcher",
-      "role": "深度调研与独立审查：领域全景、方法对比、创新点核查（t3）；并对成稿做内容层面的独立审查（t7）（ai-research-skills + deep-research-skills）",
+      "role": "深度调研：领域全景、方法对比、创新点核查、GAP 定位（只做调研，不做审查）",
       "model": "deepseek-v4.1-flash-sg",
       "reasoningEffort": "max",
-      "skills": [
-        "ai-research-skills + deep-research-skills"
-      ],
+      "tier": "strong",
       "prompt_file": "agents/deep-researcher.md",
-      "tier": "strong"
+      "skillFamilies": [
+        "academic-research-skills",
+        "ai-research-skills",
+        "deep-research-skills",
+        "supervisor-skills"
+      ],
+      "skills": [
+        "deep-research",
+        "supervisor-deep-research",
+        "research",
+        "research-add-fields",
+        "research-add-items",
+        "research-deep",
+        "research-report",
+        "brainstorming-research-ideas",
+        "creative-thinking-for-research",
+        "autoresearch",
+        "ara-compiler"
+      ]
     },
     {
       "name": "empirical-analyst",
-      "role": "实证分析：数据清洗、计量模型、结果表格、识别假设（auto-empirical-research-skills）",
+      "role": "计量实证：数据清洗、识别策略、稳健性、结果表格、复现包（二手/面板/宏观数据路径）",
       "model": "deepseek-v4.1-flash-sg",
-      "reasoningEffort": "",
-      "skills": [
+      "tier": "standard",
+      "prompt_file": "agents/empirical-analyst.md",
+      "skillFamilies": [
         "auto-empirical-research-skills"
       ],
-      "prompt_file": "agents/empirical-analyst.md",
-      "tier": "standard"
+      "skills": [
+        "full-empirical-python",
+        "full-empirical-r",
+        "full-empirical-stata",
+        "statspai",
+        "aer-identification",
+        "aer-robustness",
+        "aer-consistency",
+        "aer-tables-figures",
+        "aer-replication",
+        "aer-preregistration",
+        "00-phack-router",
+        "01-phack-taxonomy",
+        "02-forking-paths",
+        "03-specification-search",
+        "04-framing-attacks",
+        "05-narrative-laundering",
+        "06-phack-detection",
+        "07-phack-immunization",
+        "08-eval-harness",
+        "09-search-procedures",
+        "10-phack-polyglot",
+        "aer-statspai"
+      ]
+    },
+    {
+      "name": "survey-analyst",
+      "role": "问卷与量表分析：数据清理、信度效度、因子分析、方差分析、回归、中介与调节、SPSS/lavaan 实现（问卷路径）",
+      "model": "deepseek-v4.1-flash-sg",
+      "tier": "standard",
+      "prompt_file": "agents/survey-analyst.md",
+      "skillFamilies": [
+        "auto-empirical-research-skills",
+        "socialscience-zh"
+      ],
+      "skills": [
+        "reliability-validity",
+        "efa-cfa",
+        "anova-family",
+        "regression-family",
+        "mediation-moderation",
+        "sem-pls",
+        "spss-syntax",
+        "common-method-bias",
+        "nonparametric-tests",
+        "sample-size-power",
+        "aer-tables-figures",
+        "qualitative-analysis",
+        "research-ethics"
+      ]
     },
     {
       "name": "figure-designer",
-      "role": "图表设计：图表规划、绘制、PPT 版图（academic-figure-skills）",
+      "role": "图表设计：图表规划、绘制、三线表、PPT 版图（依赖实际结果，不画占位图）",
       "model": "deepseek-v4.1-flash",
-      "reasoningEffort": "",
-      "skills": [
-        "academic-figure-skills"
-      ],
+      "tier": "fast",
       "prompt_file": "agents/figure-designer.md",
-      "tier": "fast"
+      "skillFamilies": [
+        "academic-figure-skills",
+        "ai-research-skills",
+        "auto-empirical-research-skills",
+        "supervisor-skills"
+      ],
+      "skills": [
+        "fig-analyze",
+        "fig-draw",
+        "fig-pptx",
+        "academic-plotting",
+        "drawio-reconstruction",
+        "aer-tables-figures",
+        "figure-designer",
+        "presenting-conference-talks"
+      ]
     },
     {
       "name": "paper-supervisor",
-      "role": "写作与修订：全文写作、引言专项、语言润色；按独立审查意见逐条修订（supervisor-skills）",
+      "role": "写作、修订与文体处置：全文写作、引言专项、润色、按审查意见修订、去 AI 痕迹",
       "model": "deepseek-v4.1-flash-sg",
       "reasoningEffort": "max",
-      "skills": [
+      "tier": "strong",
+      "prompt_file": "agents/paper-supervisor.md",
+      "skillFamilies": [
+        "academic-research-skills",
+        "auto-empirical-research-skills",
+        "socialscience-zh",
         "supervisor-skills"
       ],
-      "prompt_file": "agents/paper-supervisor.md",
-      "tier": "strong"
+      "skills": [
+        "paper-writer",
+        "paper-polish",
+        "intro-drafter",
+        "de-aigc-skills",
+        "academic-paper",
+        "aer-introduction",
+        "aer-paper-body",
+        "aer-literature",
+        "manuscript-formatting",
+        "journal-submission",
+        "response-letter-zh"
+      ]
+    },
+    {
+      "name": "academic-reviewer",
+      "role": "独立学术审查：只审不写。对成稿做出内容、逻辑、方法、创新性的对抗式评审并给出可执行缺陷清单",
+      "model": "deepseek-v4.1-flash-sg",
+      "reasoningEffort": "max",
+      "tier": "strong",
+      "prompt_file": "agents/academic-reviewer.md",
+      "skillFamilies": [
+        "academic-research-skills",
+        "ai-research-skills",
+        "auto-empirical-research-skills",
+        "supervisor-skills"
+      ],
+      "skills": [
+        "academic-paper-reviewer",
+        "pre-submission-reviewer",
+        "aer-referee-sim",
+        "ara-rigor-reviewer",
+        "rebuttal-guidance",
+        "aer-rebuttal",
+        "ml-paper-writing",
+        "systems-paper-writing",
+        "ara-research-manager"
+      ]
     },
     {
       "name": "quality-gatekeeper",
-      "role": "质量与合规验收：引注合规、格式排版、复现包完整性、引文真实性抽核（academic-research-skills + supervisor-skills）",
+      "role": "合规验收与差异复审：引注合规、格式编号、表文数字一致、差异漂移、复现包、引文真实性",
       "model": "deepseek-v4.1-flash-sg",
-      "reasoningEffort": "",
-      "skills": [
-        "academic-research-skills",
-        "supervisor-skills"
-      ],
+      "tier": "standard",
       "prompt_file": "agents/quality-gatekeeper.md",
-      "tier": "standard"
+      "skillFamilies": [
+        "academic-research-skills",
+        "auto-empirical-research-skills",
+        "corpus-paper-archiving",
+        "socialscience-zh"
+      ],
+      "skills": [
+        "academic-paper",
+        "corpus-paper-archiving",
+        "aer-consistency",
+        "aer-submission",
+        "aer-replication",
+        "manuscript-formatting",
+        "journal-submission"
+      ]
     }
   ],
   "tasks": [
@@ -86,121 +265,441 @@
       "id": "t1",
       "name": "选题开题",
       "owner": "research-orchestrator",
-      "dependsOn": []
+      "kind": "requirements",
+      "dependsOn": [],
+      "objective": "把选题收敛成一个可执行的研究设计：研究问题、理论框架、核心假设、数据来源、目标期刊、实证路径判定。",
+      "acceptance": [
+        "研究问题一句话说得清，且能用一句话回答「凭什么值得发」",
+        "核心假设写成可检验形式（自变量 / 因变量 / 机制 / 边界条件齐备）",
+        "目标期刊已锁定 1 主 2 备，并列出该刊近 3 年 3 篇同主题文章作为标杆",
+        "明确判定实证路径：计量（t4）/ 问卷与量表（t4b）/ 两者都要 / 都不需要，并说明依据",
+        "给出不含实证情形下的替代论证方案"
+      ],
+      "deliverables": [
+        "00-brief/brief.md（研究设计全文）",
+        "00-brief/empirical-path.md（路径判定与依据）",
+        "00-brief/target-journals.md（目标刊与标杆文章）"
+      ],
+      "inScope": [
+        "paper/<slug>/00-brief"
+      ],
+      "nonGoals": [
+        "文献综述全文（属 t2/t3）",
+        "任何正文写作"
+      ]
     },
     {
       "id": "t2",
       "name": "文献精读",
       "owner": "corpus-archivist",
+      "kind": "work",
       "dependsOn": [
         "t1"
+      ],
+      "objective": "把 t1 锁定的文献逐篇读透并落成可回查的读档，形成可直接引用的文献综述素材库。",
+      "acceptance": [
+        "每篇文献一条读档，含出处（作者/篇名/刊名/年/卷期/页码或 DOI）与原文可定位页码",
+        "每条判断标注引文原文（≤50 字），不得转述后当引文",
+        "综述按争议点组织，不按时间罗列",
+        "读不到的文献标 unverified，不得凭标题臆断内容"
+      ],
+      "deliverables": [
+        "10-literature/corpus/*.md（逐篇读档）",
+        "10-literature/review-matrix.md（争议点矩阵）",
+        "10-literature/bibliography.bib 或 refs.json（引文库）"
+      ],
+      "inScope": [
+        "paper/<slug>/10-literature"
       ]
     },
     {
       "id": "t3",
       "name": "深度调研",
       "owner": "deep-researcher",
-      "dependsOn": [
-        "t1"
-      ]
-    },
-    {
-      "id": "t4",
-      "name": "实证分析",
-      "owner": "empirical-analyst",
+      "kind": "work",
       "dependsOn": [
         "t1"
       ],
-      "condition": "t1 判定为需要实证，否则跳过"
+      "objective": "给出领域全景、方法谱系与真实 GAP，证明本题目的创新点不是自说自话。",
+      "acceptance": [
+        "GAP 用「已有研究做到了 X，没做到 Y，本文补 Y，因此能带来 Z」三段式写清",
+        "方法对比表至少覆盖 4 条路线，并说明本文为何选这条",
+        "近 5 年高被引与最新进展都要有，不能只引经典",
+        "每条判断附来源，无来源的判断标为待核"
+      ],
+      "deliverables": [
+        "10-literature/landscape.md（领域全景与 GAP）",
+        "10-literature/method-comparison.md（方法对比）",
+        "10-literature/novelty-check.md（创新点自证）"
+      ],
+      "inScope": [
+        "paper/<slug>/10-literature"
+      ],
+      "note": "t3 的产出同时是 t1 创新点主张的验伪入口：若 novelty-check 判定创新点不成立，回报 captain 退回 t1。"
+    },
+    {
+      "id": "t4",
+      "name": "计量实证",
+      "owner": "empirical-analyst",
+      "kind": "implementation",
+      "dependsOn": [
+        "t1"
+      ],
+      "condition": "t1 判定为需要计量实证（二手/面板/宏观数据）",
+      "objective": "完成识别策略下的主回归与稳健性检验，产出可复算的结果表与复现包。",
+      "acceptance": [
+        "识别假设写清并给出可检验的证据（平行趋势 / 第一阶段 F / 断点密度等）",
+        "主结果 + 至少 3 组稳健性 + 至少 1 组安慰剂",
+        "表内每个数字都能由 30-analysis 脚本一键复算得出",
+        "异质性分析事先声明切分维度，不得事后挑显著",
+        "所有 p 值报告精确值，不写 p<0.05 了事"
+      ],
+      "verify": [
+        "python paper/<slug>/30-analysis/run_all.py",
+        "python scripts/verify_paper.py --selftest"
+      ],
+      "deliverables": [
+        "20-data/data-dictionary.md",
+        "30-analysis/run_all.py 或 run_all.do（一键复算）",
+        "30-analysis/results/*.csv",
+        "30-analysis/tables.md（结果表，三线表格式）",
+        "30-analysis/robustness.md"
+      ],
+      "inScope": [
+        "paper/<slug>/20-data",
+        "paper/<slug>/30-analysis"
+      ]
+    },
+    {
+      "id": "t4b",
+      "name": "问卷与量表分析",
+      "owner": "survey-analyst",
+      "kind": "implementation",
+      "dependsOn": [
+        "t1"
+      ],
+      "condition": "t1 判定为问卷/量表路径（与 t4 可并存；纯质性研究走 t3 的质性分支，不跑本任务）",
+      "objective": "完成问卷数据的信度效度检验、因子结构确认与假设模型检验，产出可直接进正文的结果表。",
+      "acceptance": [
+        "样本描述：回收率、有效样本量、人口学分布，缺失值处理方式写明",
+        "信度：总量表与各维度的 Cronbach's α（或 CR）逐个报告，α<0.7 的维度要么修正要么弃用并说明",
+        "效度：KMO + Bartlett、EFA 载荷矩阵、CFA 拟合指标（χ²/df、RMSEA、CFI、TLI、SRMR）齐备；报告 AVE 与 CR，收敛效度 AVE>0.5、区分效度 √AVE>相关系数",
+        "共同方法偏差：Harman 单因素 + 至少一种程序或统计补救",
+        "假设检验：报告系数、标准误、Bootstrap 95% CI（中介必用 BCa，≥5000 次），不只看 p 值",
+        "所有统计量都能由 30-analysis 脚本一键复算"
+      ],
+      "verify": [
+        "python paper/<slug>/30-analysis/analysis.py",
+        "python scripts/verify_paper.py --selftest"
+      ],
+      "deliverables": [
+        "20-data/data-dictionary.md",
+        "30-analysis/analysis.R 或 analysis.py（一键复算）",
+        "30-analysis/results/*.csv",
+        "30-analysis/reliability-validity.md",
+        "30-analysis/tables.md（描述统计、信效度、相关矩阵、回归、中介效应分解）"
+      ],
+      "inScope": [
+        "paper/<slug>/20-data",
+        "paper/<slug>/30-analysis"
+      ]
     },
     {
       "id": "t5",
       "name": "图表设计",
       "owner": "figure-designer",
+      "kind": "work",
       "dependsOn": [
-        "t3"
+        "t3",
+        "t4",
+        "t4b"
       ],
-      "conditionalDependsOn": [
-        "t4"
+      "dependsOnPolicy": "all",
+      "degrade": [
+        {
+          "when": "只跑计量路径（t4b 跳过）",
+          "dependsOn": [
+            "t3",
+            "t4"
+          ]
+        },
+        {
+          "when": "只跑问卷路径（t4 跳过）",
+          "dependsOn": [
+            "t3",
+            "t4b"
+          ]
+        },
+        {
+          "when": "两条路径都跳过（纯理论/综述型）",
+          "dependsOn": [
+            "t3"
+          ]
+        }
       ],
-      "condition": "需要实证时才追加依赖 t4"
+      "note": "问卷路径（t4b 执行）时，依赖改为 [\"t3\",\"t4b\"]；t4 与 t4b 都执行时为 [\"t3\",\"t4\",\"t4b\"]。图表必须基于真实结果，不得先画占位图。",
+      "objective": "把已有结果转成符合目标期刊规范的图表与三线表，不新造数据、不加装饰。",
+      "acceptance": [
+        "每张图表有规划说明：要证明什么、对应正文哪一段、数据来自哪个结果文件",
+        "所有图的数据点可追溯到 30-analysis/results 的具体单元格",
+        "三线表无竖线，表注含样本量、显著性说明、数据来源",
+        "图内文字字号在打印缩至单栏后仍 ≥7pt，中文不出现方框或乱码"
+      ],
+      "deliverables": [
+        "40-figures/figure-plan.md（图表规划表）",
+        "40-figures/src/*（绘图源文件）",
+        "40-figures/out/*.png 或 *.pdf（导出图）",
+        "40-figures/tables.md（三线表）"
+      ],
+      "inScope": [
+        "paper/<slug>/40-figures"
+      ]
     },
     {
       "id": "t6",
       "name": "全文写作",
       "owner": "paper-supervisor",
+      "kind": "implementation",
       "dependsOn": [
         "t2",
         "t3",
+        "t4",
+        "t4b",
         "t5"
       ],
-      "conditionalDependsOn": [
-        "t4"
+      "dependsOnPolicy": "all",
+      "degrade": [
+        {
+          "when": "只跑计量路径（t4b 跳过）",
+          "dependsOn": [
+            "t2",
+            "t3",
+            "t4",
+            "t5"
+          ]
+        },
+        {
+          "when": "只跑问卷路径（t4 跳过）",
+          "dependsOn": [
+            "t2",
+            "t3",
+            "t4b",
+            "t5"
+          ]
+        },
+        {
+          "when": "两条路径都跳过（纯理论/综述型）",
+          "dependsOn": [
+            "t2",
+            "t3",
+            "t5"
+          ]
+        }
       ],
-      "condition": "需要实证时才追加依赖 t4"
+      "note": "问卷路径时依赖改为 [\"t2\",\"t3\",\"t4b\",\"t5\"]。产出 v1，不得原地覆盖前版。",
+      "objective": "按目标期刊体例写出结构完整、论证闭合的初稿，每个结论都能追到 t2/t3/t4/t4b 的证据。",
+      "acceptance": [
+        "结构完整：题目、摘要、关键词、引言、文献与假设、研究设计、结果、讨论、结论、参考文献齐备",
+        "每个假设在结果部分有对应检验，每个结论在证据部分有出处，无悬空论断",
+        "摘要字数与关键词个数符合目标刊要求",
+        "引注格式统一（GB/T 7714-2015 或目标刊体例，二选一并全程一致）",
+        "正文出现的每个数字都能在 30-analysis 结果表中找到同值单元格"
+      ],
+      "verify": [
+        "python scripts/verify_paper.py stats paper/<slug>/50-draft/v1/manuscript.md",
+        "python scripts/verify_paper.py citations paper/<slug>/50-draft/v1/manuscript.md"
+      ],
+      "deliverables": [
+        "50-draft/v1/manuscript.md",
+        "50-draft/v1/claims-evidence-map.md（论断 → 证据对照表）"
+      ],
+      "inScope": [
+        "paper/<slug>/50-draft"
+      ]
     },
     {
       "id": "t7",
       "name": "独立审查",
-      "owner": "deep-researcher",
+      "owner": "academic-reviewer",
+      "kind": "review",
+      "reviews": "t6",
+      "round": 1,
+      "maxRounds": 2,
       "dependsOn": [
         "t6"
-      ]
+      ],
+      "objective": "以对抗式评审视角找出初稿在问题价值、论证逻辑、方法效度、创新性、表达上的真实缺陷，给出可执行的修改要求。",
+      "acceptance": [
+        "verdict 三选一：pass / needs_revision / reject，且 pass 必须四维全过",
+        "每条 finding 必须含：位置（页/段/表号）、问题、为什么是问题、具体怎么改",
+        "至少给出 3 条 high 及以上级别问题，若确实没有须逐条说明为何已达标",
+        "不得修改稿件本身；只出意见"
+      ],
+      "deliverables": [
+        "60-review/r1/review.md（评审意见，含 verdict 与 finding 清单）"
+      ],
+      "inScope": [
+        "paper/<slug>/60-review"
+      ],
+      "forbidden": "禁止修改 50-draft 下任何文件"
     },
     {
       "id": "t8",
       "name": "修订",
       "owner": "paper-supervisor",
+      "kind": "repair",
       "dependsOn": [
         "t7"
+      ],
+      "round": 1,
+      "objective": "逐条回应 t7 的 finding，产出 v2 与逐条对照表；不接受的意见须给出拒绝理由。",
+      "acceptance": [
+        "t7 的每条 finding 都有编号对应处置：已改 / 部分改 / 不改（须说明理由）",
+        "改动后的稿件另存 v2，不覆盖 v1",
+        "对照表能让未读原文的人看出每条意见落在了哪一段"
+      ],
+      "verify": [
+        "python scripts/verify_paper.py all paper/<slug>/50-draft/v2/manuscript.md --results paper/<slug>/30-analysis/results"
+      ],
+      "deliverables": [
+        "50-draft/v2/manuscript.md",
+        "60-review/r1/response-to-review.md（逐条对照表）"
+      ],
+      "inScope": [
+        "paper/<slug>/50-draft",
+        "paper/<slug>/60-review"
       ]
     },
     {
       "id": "t9",
       "name": "去 AI 痕迹",
-      "owner": "empirical-analyst",
+      "owner": "paper-supervisor",
+      "kind": "repair",
       "dependsOn": [
         "t8"
+      ],
+      "objective": "在不改变事实、数字、引注与论证结构的前提下，消除模板腔与 AI 文体特征，产出 v3。",
+      "acceptance": [
+        "只改表达不改事实：v2→v3 的数字、单位、引注、结论零漂移，逐项比对通过",
+        "AI 特征词与句式（综上/首先其次最后/不仅而且/值得注意的是等）密度显著下降并给出前后计数",
+        "无防御性写作（「需要指出的是」「值得一提的是」）与过度解释",
+        "段落有长短节奏，不出现连续 5 段同长度"
+      ],
+      "verify": [
+        "python scripts/verify_paper.py all paper/<slug>/50-draft/v3/manuscript.md --results paper/<slug>/30-analysis/results"
+      ],
+      "deliverables": [
+        "50-draft/v3/manuscript.md",
+        "60-review/t9/style-diff.md（前后对照与计数）"
+      ],
+      "inScope": [
+        "paper/<slug>/50-draft",
+        "paper/<slug>/60-review"
       ]
     },
     {
       "id": "t10",
       "name": "候选定稿",
       "owner": "research-orchestrator",
+      "kind": "integration",
       "dependsOn": [
         "t9"
+      ],
+      "objective": "做全局一致性收敛与体例统一，产出可送审的候选定稿 v4。",
+      "acceptance": [
+        "摘要-引言-结果-结论四处的核心数字与结论一致",
+        "章节号、图表号、交叉引用、参考文献序号全部连续且可解析",
+        "术语与译名全文统一，缩写首次出现给全称",
+        "体例统一到目标刊一份标准，不留混排"
+      ],
+      "deliverables": [
+        "50-draft/v4/manuscript.md",
+        "50-draft/v4/final-check.md（定稿检查清单）"
+      ],
+      "inScope": [
+        "paper/<slug>/50-draft"
       ]
+    },
+    {
+      "id": "t10.5",
+      "name": "差异复审",
+      "owner": "quality-gatekeeper",
+      "kind": "review",
+      "reviews": "t10",
+      "dependsOn": [
+        "t10"
+      ],
+      "objective": "只审 t9→t10 的实际改动，确认定稿阶段没有引入任何未经授权的漂移。",
+      "acceptance": [
+        "逐条列出 t9→t10 的全部差异，每条标注：性质（格式 / 措辞 / 实质）+ 是否影响结论",
+        "任何数值、单位、引注、结论的实质变更必须有授权来源（t7 finding 或 captain 书面批准），否则判 fail",
+        "verdict 三选一：pass / needs_revision（属实害漂移）/ reject（无法追溯来源的大面积改写）",
+        "不得修改稿件"
+      ],
+      "deliverables": [
+        "60-review/t10.5/drift-report.md（差异清单 + verdict）"
+      ],
+      "inScope": [
+        "paper/<slug>/60-review"
+      ],
+      "forbidden": "禁止修改 50-draft 下任何文件"
     },
     {
       "id": "t11",
       "name": "质量验收",
       "owner": "quality-gatekeeper",
+      "kind": "review",
+      "reviews": "t10",
       "dependsOn": [
-        "t10"
-      ]
+        "t10.5"
+      ],
+      "objective": "对候选定稿做四道闸门的最终判定：引注合规、格式编号、表文数字一致、复现包与引文真实性。",
+      "acceptance": [
+        "闸门一 引注合规：正文引注与文后条目双向一一对应，格式合目标刊或 GB/T 7714-2015；每处违规给出页码与期望格式",
+        "闸门二 格式编号：标题层级、图表编号、交叉引用、单位与小数位一致",
+        "闸门三 表文数字一致：正文每个数字都能在表内找到同值单元格，不一致即 finding",
+        "闸门四 引文真实性：抽样核对出处；“领导人著作与讲话”类逐条核对不抽样，核不到标 unverified",
+        "复现包：按 run_all 声明步骤重跑能复现正文报告的数字",
+        "verdict=pass 仅在四闸门全过或剩余问题经 captain 书面豁免时给出"
+      ],
+      "deliverables": [
+        "60-review/t11/acceptance-report.md（四闸门判定 + verdict）",
+        "60-review/t11/findings.md（缺陷清单，含位置）"
+      ],
+      "inScope": [
+        "paper/<slug>/60-review"
+      ],
+      "forbidden": "禁止修改 50-draft 下任何文件；发现问题退回 t8，不在验收环节改稿"
     }
   ],
   "flowRules": [
-    "写作（t6）与独立审查（t7）不得由同一成员承担。",
-    "质量验收（t11）独立于写作与修订环节；verdict=pass 方可交付。",
-    "t11 判 fail 时退回 t8 的责任成员，按缺陷清单重走 t8→t11，不在验收环节改稿。",
-    "t4 是否执行由 t1 的实证判定决定；判定为不需要时，t5 与 t6 的依赖中移除 t4。"
+    "【写作与审查分离】t6 / t8 / t9 由 paper-supervisor 承担，t7 由 academic-reviewer 承担，两者不得为同一成员；t7 的审查者也不得是 t3 的调研者（deep-researcher），避免审自己的贡献。",
+    "【验收独立且后置】t11 独立于写作与修订；verdict=pass 方可交付。t11 判 fail 时退回 t8 的责任成员，不在验收环节改稿。",
+    "【返工闭环】t7 verdict≠pass → 回到 t6 重写，重走 t6→t7，而不是直接进 t8。t8 只在 t7 给出 needs_revision 且缺陷可局部修补时承接。",
+    "【轮次上限】maxRounds=2。第 2 轮 t7 仍 fail，captain 停止自动重跑，转人工裁决，全部 fail 记录汇总到 60-review/escalation.md，不得开第 3 轮。",
+    "【差异复审闸门】t10 定稿后必须经 t10.5 比对 t9→t10 的实际改动；任何数值、单位、引注、结论的漂移必须逐条说明来源或回退，未通过不得进 t11。",
+    "【t11 回退路径】t11 fail → 回 t8，重走 t8→t9→t10→t10.5→t11，同样受 maxRounds=2 约束。",
+    "【条件分支】t4 与 t4b 是否执行由 t1 判定：计量路径跑 t4，问卷/量表路径跑 t4b，两者皆需则都跑。被跳过的任务从 t5 与 t6 的依赖中移除，避免等待永不发生的任务。",
+    "【失败重派】成员连续 2 次失败，captain 重派给同族次优成员，并在交付物首行标注「代执行人 / 原责任人 / 代执行原因 / 授权来源」。",
+    "【代做上限】同一任务不得由 captain 连续代做超过 1 次；第 2 次仍失败必须换成员或转人工裁决，不允许 captain 一人从头做到尾。",
+    "【工作区约定】所有产出写入 paper/<slug>/<NN-stage>/，目录含义见 workspace.layout；交付物未落盘视为未交付，路径不对视为未交付。",
+    "【版本不可覆盖】t8 / t9 / t10 不得原地覆盖上一版，必须新建 v2 / v3 / v4；修订必须有逐条对照表。",
+    "【技能加载】每个成员接单第一步必须按自己 agent.md 的「开工前必读」加载对应技能；未加载即产出视为流程违规，审查环节有权直接退回。",
+    "【模型不得自审】同一模型实例不得同时承担同一稿件的写作与审查；换模型替代成员时，审查方必须换到不同模型或不同成员。"
   ],
   "modelPolicy": {
     "tiers": {
       "strong": {
         "model": "deepseek-v4.1-flash-sg",
         "reasoningEffort": "max",
-        "note": "判断型任务：选题、审查、写作。换成你账号里的强模型时改这里。"
+        "note": "判断型任务：选题、调研、写作、审查。换成你账号里的强模型时改这里。"
       },
       "standard": {
         "model": "deepseek-v4.1-flash-sg",
-        "reasoningEffort": "",
-        "note": "有脚本或清单兜底的任务：实证、验收。"
+        "note": "有脚本或核对清单兜底的任务：实证、问卷统计、验收。reasoningEffort 留空 = 模型默认，注意不要写空字符串（非法值）。"
       },
       "fast": {
         "model": "deepseek-v4.1-flash",
-        "reasoningEffort": "",
         "note": "模式化、量大的任务：读档、绘图。"
       }
     },
@@ -209,29 +708,37 @@
         "tier": "strong",
         "why": "t1 选题决定后续全部返工成本；t10 定稿需判断取舍"
       },
-      "deep-researcher": {
-        "tier": "strong",
-        "why": "t3 创新点核查与 t7 独立审查都是判断型任务，弱模型易放过问题"
-      },
-      "paper-supervisor": {
-        "tier": "strong",
-        "why": "t6 全文写作与 t8 修订直接决定成稿质量"
-      },
-      "empirical-analyst": {
-        "tier": "standard",
-        "why": "t4 有脚本与结果表兜底；t9 去 AIGC 属模式化改写"
-      },
-      "quality-gatekeeper": {
-        "tier": "standard",
-        "why": "t11 按核对表逐条比对，规则明确，不依赖生成能力"
-      },
       "corpus-archivist": {
         "tier": "fast",
         "why": "t2 读档量大、格式固定，靠模板与页码定位"
       },
+      "deep-researcher": {
+        "tier": "strong",
+        "why": "t3 创新点核查是判断型任务，弱模型易放过问题"
+      },
+      "empirical-analyst": {
+        "tier": "standard",
+        "why": "t4 有脚本与结果表兜底，规则明确"
+      },
+      "survey-analyst": {
+        "tier": "standard",
+        "why": "t4b 有检验清单与脚本兜底；信效度判定有硬阈值，不依赖生成能力"
+      },
       "figure-designer": {
         "tier": "fast",
-        "why": "t5 先规划后绘制，输出是图表规格而非长文本"
+        "why": "t5 输出是图表规格与绘图代码，不写长文本"
+      },
+      "paper-supervisor": {
+        "tier": "strong",
+        "why": "t6 写作、t8 修订、t9 文体处置直接决定成稿质量"
+      },
+      "academic-reviewer": {
+        "tier": "strong",
+        "why": "t7 是对抗式评审，弱模型会交出场面话式的假通过"
+      },
+      "quality-gatekeeper": {
+        "tier": "standard",
+        "why": "t10.5 与 t11 按核对表逐条比对，规则明确，不依赖生成能力"
       }
     }
   }

@@ -1,6 +1,6 @@
 ---
-name: phack-immunization
-description: Make an empirical analysis robust to specification search, before or after the fact. Covers pre-registration and pre-analysis plans encoded as design cards, specification-curve reporting with the Simonsohn joint tests, Romano-Wolf and effective-multiplicity corrections, full-procedure null calibration including for sequential searches, the distance-from-pre-registration diagnostic, split-sample and holdout designs, and the auto-generated honest report. Use when asked how to protect an analysis against p-hacking, how to correct inference after a search has happened, how to write a pre-analysis plan, or how to report a multiverse credibly.
+name: "07-phack-immunization"
+description: "Make an empirical analysis robust to specification search, before or after the fact. Covers pre-registration and pre-analysis plans encoded as design cards, specification-curve reporting with the Simonsohn joint tests, Romano-Wolf and effective-multiplicity corrections, full-procedure null calibration including for sequential searches, the distance-from-pre-registration diagnostic, split-sample and holdout designs, and the auto-generated honest report. Use when asked how to protect an analysis against p-hacking, how to correct inference after a search has happened, how to write a pre-analysis plan, or how to report a multiverse credibly."
 ---
 
 # Immunising an analysis

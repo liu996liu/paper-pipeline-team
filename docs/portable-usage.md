@@ -58,10 +58,11 @@ model: inherit
 
 技能库位于 .claude/skills（或已扁平化的 skills/），使用时先读取对应 SKILL.md 再执行。
 
-任务顺序：t1 选题 → t2 文献精读 → t3 深度调研 → t4 实证 → t5 图表
-→ t6 写作 → t7 独立审查 → t8 修订 → t9 去 AI 痕迹 → t10 候选定稿 → t11 质量验收
+任务顺序：t1 选题 → t2 文献精读 / t3 深度调研 / t4 计量实证 或 t4b 问卷量表
+→ t5 图表 → t6 写作 → t7 独立审查 → t8 修订 → t9 去 AI 痕迹 → t10 候选定稿
+→ t10.5 差异复审 → t11 质量验收
 
-硬规则：写作与审查不得同一人；质量验收 pass 才交付。
+硬规则：写作与审查不得同一人；质量验收 pass 才交付；每个成员接单第一步先加载自己绑定的技能。
 ```
 
 技能仍需扁平化到 Codex 认识的目录。
@@ -91,7 +92,34 @@ python scripts/install.py --target ~/.workbuddy/skills
 
 ### 5. DeepSeek Harness（原环境）
 
-原样导入 `team.json` 即可，它认识 `members`、`tasks`、`flowRules` 三个字段。`vendor/agent-teams/` 是该平台的运行时协议（不在 `skills/` 下，安装脚本不会复制），其他客户端用不到。
+Harness 的 AgentTeams 插件**不认识 `team.json` 的原生格式**——它的 profile 校验是严格的（源码 `lib/profiles.js` 的 `assertAllowedKeys` 遇到未知键直接抛错），允许的键只有：
+
+| 层级 | 允许的键 |
+|---|---|
+| profile | `description` `protocol` `executionPrompt` `fallback` `members` `tasks` `taskPlanning` `reviewPolicy` |
+| member | `name` `role` `provider` `model` `reasoning_effort` `executionPrompt` `fallback` `tool_policy` |
+| task | `id` `subject` `description` `assignee` `dependencies` |
+
+`team.json` 里的 `kind` / `objective` / `acceptance` / `verify` / `degrade` / `dependsOnPolicy` / `flowRules` / `retryPolicy` / `workspace` 全部是平台未知键，原样导入会直接报 `profiles.xxx.tasks[0].kind is unknown`。
+
+正确做法是用编译脚本单向生成：
+
+```bash
+python scripts/export_profile.py --out docs/dsh-profile.yml
+```
+
+生成的 `docs/dsh-profile.yml` 是一个合法的 profile 片段，做了三件事：
+
+1. 成员 → `members[]`，带上模型与 `reasoning_effort`（注意：`reasoningEffort` 为空字符串时**整段省略**，因为插件不会清洗空串，会当成非法强度传下去）
+2. 13 个任务按拓扑序 → `tasks[]`，`id` / `subject` / `assignee` / `dependencies` 直接对应
+3. 平台不认识的契约字段（objective / acceptance / deliverables / verify / degrade / 禁止项 / 轮次）**压成每个 task 的 `description` 前缀**，flowRules 与 retryPolicy 压进 profile 的 `protocol`——这样 captain 开设团队时仍看得到它们，而不是悄悄丢掉
+
+装法：把生成文件里的 `profiles:` 段合并进 `~/.dsh/profiles/<你的 profile>/cordis.patch.yml`，然后 `/agent-teams --profile paper-pipeline <研究目标>`。
+
+> **9 人超出默认上限**：插件的 `maxMembers` 默认是 8，本团队 9 人。必须在同一份 `cordis.patch.yml` 的 `agent-teams` 条目里加 `config: { maxMembers: 9 }`，否则 `agent_teams_create({profile})` 会报 `has 9 members but maxMembers is 8`。生成文件顶部已写好这段注释。
+
+> **单向同步**：`docs/dsh-profile.yml` 是生成物，改 `team.json` 后要重跑 `export_profile.py`；CI 的 `--check` 会拦住忘记重跑的情况。反过来不要手改生成文件。
+
 
 ### 6. 只能对话、没有工具的环境（ChatGPT 网页等）
 
@@ -107,7 +135,7 @@ python scripts/install.py --target ~/.workbuddy/skills
 
 如果目标客户端已有自己的技能体系，可以只用 `team.json` 与 `agents/`：
 
-- `team.json` 的 `tasks` 给出 11 个任务、负责人与依赖，`flowRules` 给出 4 条硬规则
+- `team.json` 的 `tasks` 给出 13 个任务、负责人与依赖（每个任务还带 objective / acceptance / deliverables / inScope），`flowRules` 给出 13 条硬规则，`workspace` 给出目录约定，`retryPolicy` 给出降级策略
 - 照着它在你所用客户端里建 agent，把 `agents/*.md` 的 persona 作为各自系统提示词
 - 技能换成该客户端自带的对应能力
 
@@ -127,7 +155,7 @@ python scripts/install.py --target ~/.workbuddy/skills
 
 ---
 
-## 四、常见问题
+## 五、常见问题
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
@@ -136,3 +164,6 @@ python scripts/install.py --target ~/.workbuddy/skills
 | 子代理报 model 非法 | frontmatter 的 model 值不被支持 | 改为该客户端接受的值或删除 |
 | 同名技能被覆盖 | 多个族里有同名目录 | `install.py` 会报告冲突，需手动决定保留哪个 |
 | 技能里的脚本跑不了 | 缺少 Python 依赖 | 各 SKILL.md 的 `references/` 或 `requirements.txt` 里有说明 |
+| `check_skills.py` 报 name 不一致 | 手工改过 frontmatter | 跑 `python scripts/normalize_skills.py` 批量对齐 name 与目录名 |
+| 改了 `team.json` 但成员没变 | `agents/*.md` 是生成物 | 依次跑 `gen_agents.py`、`apply_models.py`、`gen_llms.py` |
+| 成员不加载技能就开工 | 客户端不主动读仓库 | 每个 `agents/*.md` 开头有「开工前必读」清单，靠提示词强约束；见 flowRule 12 |

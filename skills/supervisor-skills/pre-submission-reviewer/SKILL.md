@@ -1,14 +1,6 @@
 ---
-name: pre-submission-reviewer
-description: >-
-  Runs a pre-submission review of a technical paper across five
-  dimensions: macro logic, writing details, English grammar, LaTeX
-  formatting, and figure quality. Uses a reviewer-style severity
-  taxonomy (CRITICAL / MAJOR / MINOR) and flags banned AI-tone
-  vocabulary and em-dash misuse. Use when the user asks to 'review
-  this paper', 'audit before submission', 'check the draft', 'find
-  issues', 'proofread', or within one week of a submission
-  deadline.
+name: "pre-submission-reviewer"
+description: "Runs a pre-submission review of a technical paper across five dimensions: macro logic, writing details, English grammar, LaTeX formatting, and figure quality. Uses a reviewer-style severity taxonomy (CRITICAL / MAJOR / MINOR) and flags banned AI-tone vocabulary and em-dash misuse. Use when the user asks to 'review this paper', 'audit before submission', 'check the draft', 'find issues', 'proofread', or within one week of a submission deadline."
 license: CC-BY-4.0
 ---
 

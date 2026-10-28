@@ -1,6 +1,6 @@
 ---
-name: presenting-conference-talks
-description: Generates conference presentation slides (Beamer LaTeX PDF and editable PPTX) from a compiled paper with speaker notes and talk script. Use when preparing oral talks, spotlight presentations, or invited talks for ML and systems conferences.
+name: "presenting-conference-talks"
+description: "Generates conference presentation slides (Beamer LaTeX PDF and editable PPTX) from a compiled paper with speaker notes and talk script. Use when preparing oral talks, spotlight presentations, or invited talks for ML and systems conferences."
 version: 1.0.0
 author: Orchestra Research
 license: MIT

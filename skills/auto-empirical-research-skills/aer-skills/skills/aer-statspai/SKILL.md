@@ -1,6 +1,6 @@
 ---
-name: aer-statspai
-description: Use when aer-identification has fixed the design, after methodology choice and before aer-robustness or aer-tables-figures, to run an AER-track analysis with StatsPAI — the agent-native Python engine and MCP server for causal inference, robustness, sensitivity, and publication-ready table export.
+name: "aer-statspai"
+description: "Use when aer-identification has fixed the design, after methodology choice and before aer-robustness or aer-tables-figures, to run an AER-track analysis with StatsPAI — the agent-native Python engine and MCP server for causal inference, robustness, sensitivity, and publication-ready table export."
 ---
 
 # AER StatsPAI

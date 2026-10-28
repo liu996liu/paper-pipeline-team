@@ -1,9 +1,6 @@
 ---
-name: fig-pptx
-description: >
-  把已接受的学术示意图拆成可编辑 PPTX：干净背景、透明框架、透明图标、真文本框。
-  用户要求可编辑文字、可编辑 PPT、fig-pptx，或点名把 AI 图转成 PPTX 时使用。
-  不改源 PNG。结果图的数据点必须保持原样时不要用。
+name: "fig-pptx"
+description: "把已接受的学术示意图拆成可编辑 PPTX：干净背景、透明框架、透明图标、真文本框。 用户要求可编辑文字、可编辑 PPT、fig-pptx，或点名把 AI 图转成 PPTX 时使用。 不改源 PNG。结果图的数据点必须保持原样时不要用。"
 metadata:
   version: "1.1.0"
 ---

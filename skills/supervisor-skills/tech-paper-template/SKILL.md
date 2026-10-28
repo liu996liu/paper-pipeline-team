@@ -1,14 +1,6 @@
 ---
-name: tech-paper-template
-description: >-
-  Structures a technical paper's full logical skeleton using a
-  thinking-template table (research background, limitations, key idea
-  or goal, challenges, methodology modules, contributions), positions
-  the paper as Technique or New Problem/Setting, and runs a four-point
-  self-consistency check. Use when the user is brainstorming a paper,
-  discussing progress with an advisor, or planning the paper before
-  drafting. Also use for 'paper skeleton', 'paper logic chain',
-  'thinking template', 'paper-structure planning'.
+name: "tech-paper-template"
+description: "Structures a technical paper's full logical skeleton using a thinking-template table (research background, limitations, key idea or goal, challenges, methodology modules, contributions), positions the paper as Technique or New Problem/Setting, and runs a four-point self-consistency check. Use when the user is brainstorming a paper, discussing progress with an advisor, or planning the paper before drafting. Also use for 'paper skeleton', 'paper logic chain', 'thinking template', 'paper-structure planning'."
 license: CC-BY-4.0
 ---
 

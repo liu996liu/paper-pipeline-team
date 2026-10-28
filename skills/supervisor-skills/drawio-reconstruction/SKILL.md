@@ -1,5 +1,5 @@
 ---
-name: drawio-reconstruction
+name: "drawio-reconstruction"
 description: "Reconstructs reference images into high-fidelity, editable Draw.io files with rendered previews: native Draw.io elements carry text and structure, SVG covers simple icons that match the reference, and cropped or transparent PNGs preserve complex visuals. Use when the user wants a diagram image, research figure, architecture diagram, slide, UI screenshot, or image folder turned into `.drawio` XML; batch requests use a manifest with bounded parallelism when available and a full-fidelity serial fallback otherwise."
 ---
 

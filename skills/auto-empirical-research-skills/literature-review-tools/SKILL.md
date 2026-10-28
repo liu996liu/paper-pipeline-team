@@ -1,17 +1,6 @@
 ---
-name: literature-review-tools
-description: >-
-  Recommend AND run open-source AI tools, agents, Claude Code / Codex skills, and
-  MCP servers for any stage of a literature review — searching, reading,
-  extracting, synthesizing, screening, citation-checking, and paper writing. Use
-  when the user asks "what tool should I use to..." OR "install/run/use <tool> to
-  ..." for research/lit-review work: automating a survey or related-work section,
-  PDF→Markdown extraction for LLMs (MinerU/marker/docling), PRISMA / systematic
-  review (ASReview), citation-backed Q&A over PDFs (PaperQA2), wiring papers into
-  Claude/Cursor via MCP (arxiv/paper-search/zotero servers), or chatting with a
-  Zotero library. Ships a launcher (scripts/litrun.py) that installs each tool in
-  an isolated venv and runs it. Curated catalog of 70+ vetted projects.
-  支持中英文（用于「文献综述工具选型」与「一键安装/运行」）。
+name: "literature-review-tools"
+description: "Recommend AND run open-source AI tools, agents, Claude Code / Codex skills, and MCP servers for any stage of a literature review — searching, reading, extracting, synthesizing, screening, citation-checking, and paper writing. Use when the user asks \"what tool should I use to...\" OR \"install/run/use <tool> to ...\" for research/lit-review work: automating a survey or related-work section, PDF→Markdown extraction for LLMs (MinerU/marker/docling), PRISMA / systematic review (ASReview), citation-backed Q&A over PDFs (PaperQA2), wiring papers into Claude/Cursor via MCP (arxiv/paper-search/zotero servers), or chatting with a Zotero library. Ships a launcher (scripts/litrun.py) that installs each tool in an isolated venv and runs it. Curated catalog of 70+ vetted projects. 支持中英文（用于「文献综述工具选型」与「一键安装/运行」）。"
 ---
 
 # Literature Review Tools — Select & Run

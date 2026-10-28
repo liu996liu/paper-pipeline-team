@@ -1,18 +1,21 @@
 cff-version: 1.2.0
 message: "如需在论文、报告或项目中引用本团队配置，请使用以下信息。"
-title: "论文攻坚组 paper-pipeline：七成员学术论文协作智能体团队"
-abstract: "一套面向实证类学术论文的多智能体协作配置：7 名成员按「选题—文献—调研—实证—图表—写作—独立审查—修订—去AI痕迹—定稿—质量验收」排成 11 个任务的流水线，每名成员绑定一组专用技能库，由研究总控统一派单。"
+title: "论文攻坚组 paper-pipeline：九成员学术论文协作智能体团队"
+abstract: "一套面向实证类学术论文的多智能体协作配置：9 名成员按「选题—文献—深度调研—计量实证/问卷量表—图表—写作—独立审查—修订—去AI痕迹—候选定稿—差异复审—质量验收」排成 13 个任务的流水线，每个任务带可判定的验收标准，每名成员绑定一组专用技能库，由研究总控统一派单。写作与审查分离，审查与调研分离，质量验收独立且须 pass 才交付。"
 authors:
   - name: "liu996liu"
 type: software
 license: CC-BY-NC-SA-4.0
 repository-code: "https://github.com/liu996liu/paper-pipeline-team"
 url: "https://github.com/liu996liu/paper-pipeline-team"
-version: 1.0.0
-date-released: "2026-10-26"
+version: 2.0.0
+date-released: "2026-10-28"
 keywords:
   - multi-agent
   - academic-writing
   - research-workflow
   - agent-skills
   - paper-pipeline
+  - csSCI
+  - empirical-research
+  - questionnaire-analysis

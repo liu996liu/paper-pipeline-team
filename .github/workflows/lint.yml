@@ -1,0 +1,50 @@
+name: lint
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: pip install pyyaml python-docx
+
+      - name: 统计量校验脚本自检（t/F/χ²/Z 分布数值精度）
+        run: python scripts/verify_paper.py --selftest
+
+      - name: 技能库自检（frontmatter 可解析 / name 与目录一致 / 描述长度）
+        run: python scripts/check_skills.py
+
+      - name: agents/*.md 与生成脚本一致
+        run: python scripts/gen_agents.py --check
+
+      - name: llms.txt 与 team.json / skills/ 一致
+        run: python scripts/gen_llms.py --check
+
+      - name: modelPolicy 与各成员 frontmatter 一致
+        run: python scripts/apply_models.py --dry-run --strict
+
+      - name: team.json 结构校验
+        run: python scripts/check_team.py
+
+      - name: 交稿 Word 生成脚本冒烟测试
+        run: python scripts/selftest_docx.py
+
+      - name: 配置手册可从 team.json 现算生成
+        # 手册是生成物。手写的汇总文档迟早与配置脱节，
+        # 而它长得像官方文件，比 README 更容易被当真。
+        run: python scripts/gen_manual.py --check
+
+      - name: DSH AgentTeams profile 与 team.json 一致
+        # team.json 的字段平台不认识，必须编译成合法 profile 才能用。
+        # 手抄一份 yml 必然漂移（成员数/任务数/模型名最容易漏改），所以让它成为生成物。
+        run: python scripts/export_profile.py --check
+

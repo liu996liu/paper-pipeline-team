@@ -1,6 +1,6 @@
 ---
-name: aer-referee-sim
-description: Use when a complete draft exists and needs an adversarial internal review before submission — simulating the AER desk screen and three referee reports with calibrated severity, scoring the paper against the editorial rubric, and producing a prioritized revise list. Apply after aer-consistency passes and before aer-submission; rerun until the simulated verdict is at least major R&R.
+name: "aer-referee-sim"
+description: "Use when a complete draft exists and needs an adversarial internal review before submission — simulating the AER desk screen and three referee reports with calibrated severity, scoring the paper against the editorial rubric, and producing a prioritized revise list. Apply after aer-consistency passes and before aer-submission; rerun until the simulated verdict is at least major R&R."
 ---
 
 # AER Referee Simulation

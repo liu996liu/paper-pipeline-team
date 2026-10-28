@@ -1,6 +1,6 @@
 ---
-name: brainstorming-research-ideas
-description: Guides researchers through structured ideation frameworks to discover high-impact research directions. Use when exploring new problem spaces, pivoting between projects, or seeking novel angles on existing work.
+name: "brainstorming-research-ideas"
+description: "Guides researchers through structured ideation frameworks to discover high-impact research directions. Use when exploring new problem spaces, pivoting between projects, or seeking novel angles on existing work."
 version: 1.0.0
 author: Orchestra Research
 license: MIT

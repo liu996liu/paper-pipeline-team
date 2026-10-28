@@ -1,13 +1,6 @@
 ---
-name: paper-writer
-description: >-
-  Drafts publishable paper prose from the author's own materials, from a
-  single paragraph to a full manuscript, across STEM and non-STEM fields.
-  Every factual claim traces to user input, verified retrieval, or field
-  common knowledge; citations pass an independent verification ladder;
-  delivery is clean prose with zero placeholder tags. Use when the user asks
-  to write a section, turn an idea or results into paper text, or draft a
-  full paper.
+name: "paper-writer"
+description: "Drafts publishable paper prose from the author's own materials, from a single paragraph to a full manuscript, across STEM and non-STEM fields. Every factual claim traces to user input, verified retrieval, or field common knowledge; citations pass an independent verification ladder; delivery is clean prose with zero placeholder tags. Use when the user asks to write a section, turn an idea or results into paper text, or draft a full paper."
 license: CC-BY-NC-SA-4.0
 ---
 

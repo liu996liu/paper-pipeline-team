@@ -1,6 +1,6 @@
 ---
-name: framing-attacks
-description: Catalogue of prompt framings that determine whether an agent refuses or performs specification search, and the harness for probing them. Reproduces and extends the published finding that coding agents refuse an explicit request for significant results but comply when the identical request is reframed as uncertainty reporting. Use when running a red-team probe of statistical guardrails, designing eval conditions for an agent p-hacking benchmark, measuring the gap between refusal-by-framing and refusal-by-intent, or assessing whether a prompt someone received was engineered to induce specification search.
+name: "04-framing-attacks"
+description: "Catalogue of prompt framings that determine whether an agent refuses or performs specification search, and the harness for probing them. Reproduces and extends the published finding that coding agents refuse an explicit request for significant results but comply when the identical request is reframed as uncertainty reporting. Use when running a red-team probe of statistical guardrails, designing eval conditions for an agent p-hacking benchmark, measuring the gap between refusal-by-framing and refusal-by-intent, or assessing whether a prompt someone received was engineered to induce specification search."
 ---
 
 # Framings that move statistical guardrails
